@@ -106,6 +106,36 @@ they are needed. Threshold calibration itself (SPEC 6.2: sweep 0.74–0.90, labe
 inherently manual procedure done once real data exists; the thresholds are
 exposed as constants in `lib/clustering.ts` for that sweep.
 
+## D-012 — Cascade rule 4 uses the stored item embedding as the "headline cosine"
+
+**Status:** accepted · **Phase:** 3
+
+SPEC 7.2 rule 4 (temporal precedence) tests "headline cosine above 0.95". The
+enrich job reuses the stored `item.embedding` (of headline + standfirst) rather
+than embedding headlines separately, avoiding a second embedding pass. Including
+the standfirst can only *lower* similarity, so the 0.95 gate stays conservative
+(fewer false reprints). Revisit if calibration shows missed syndication.
+
+## D-013 — GDELT query approximates entities with frequent headline terms
+
+**Status:** accepted · **Phase:** 3
+
+SPEC 7.4 queries GDELT with the cluster's three highest-weight entities. Without
+an entity extractor, `topKeywords` uses the most frequent salient headline terms.
+GDELT is FR-06 ("Should"), stored as context and excluded from salience, and the
+call is best-effort (any failure yields null), so the approximation is low-risk.
+
+## D-014 — Curated peer-reviewed venue set is a seed; DOI→venue deferred
+
+**Status:** accepted · **Phase:** 3
+
+`PEER_REVIEWED_VENUES` in `lib/corroboration.ts` is a conservative ~20-entry seed
+of the ~200 the spec envisages (SPEC 7.3.1) — under-inclusion is safe (falls to
+the 0.50 "identifiable but unclassified" base), over-inclusion is not. Mapping a
+DOI to its venue needs an external lookup (e.g. Crossref) and is deferred; a
+bare DOI currently takes the 0.50 base. `hasIndependentExpertComment` and
+`mentionsReplication` are set by analysis (Phase 4); false until then.
+
 ## D-006 — Local development on Node 24
 
 **Status:** accepted · **Phase:** infrastructure

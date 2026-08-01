@@ -97,11 +97,11 @@ async function persistItems(sql: Sql, feed: FeedRow, xml: string): Promise<numbe
     const result = await sql`
       INSERT INTO item (
         feed_id, outlet_id, source_guid, url, headline, standfirst,
-        published_at, language, content_hash
+        published_at, language, content_hash, creator
       ) VALUES (
         ${feed.id}, ${feed.outlet_id}, ${item.sourceGuid}, ${item.url},
         ${item.headline}, ${item.standfirst}, ${item.publishedAt},
-        ${item.language}, ${item.contentHash}
+        ${item.language}, ${item.contentHash}, ${item.creator}
       )
       ON CONFLICT (feed_id, source_guid) DO NOTHING
     `;
