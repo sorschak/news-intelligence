@@ -11,6 +11,7 @@
     "migrate": "tsx src/scripts/migrate.ts up",
     "migrate:down": "tsx src/scripts/migrate.ts down",
     "seed": "tsx src/scripts/seed.ts",
+    "seed-feeds": "tsx src/scripts/seed-feeds.ts",
     "discover": "tsx src/scripts/discover.ts",
     "status": "tsx src/scripts/status.ts",
     "ingest": "tsx src/jobs/ingest.ts",
