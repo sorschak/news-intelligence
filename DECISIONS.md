@@ -73,6 +73,39 @@ plus gclid/mc_cid/mc_eid). Redirect-hop resolution is deferred: it costs one
 network round-trip per item and is not needed for storage or attribution, which
 use the publisher's own link. It can be added in the ingest path later.
 
+## D-009 — Embedding provider is configurable; defaults to Voyage
+
+**Status:** accepted · **Phase:** 2
+
+SPEC 3.3 requires a hosted multilingual embedding API but names none.
+`src/lib/embeddings.ts` supports `voyage` (default), `openai`, and `cohere`,
+selected by `EMBEDDING_PROVIDER`, so the account/key decision is deferred to
+config. Voyage is the default (multilingual, low cost, native 1024-dim, Anthropic
+-recommended). Returned dimensionality is validated against `EMBEDDING_DIMS`.
+
+## D-010 — Pure clustering helpers live in `lib/clustering.ts`
+
+**Status:** accepted · **Phase:** 2
+
+CLAUDE.md's layout lists clustering under `jobs/cluster.ts`, but that file runs
+`main()` on import and cannot be imported by tests. The side-effect-free helpers
+(cosine, assignment decision, vector serialisation) are therefore in a new
+`lib/clustering.ts`; the job orchestrates DB + pgvector around them. Not a spec
+disagreement — an organisational split for testability.
+
+## D-011 — §6.3 quality mitigations deferred; calibration is manual
+
+**Status:** accepted · **Phase:** 2
+
+Phase 2 implements the core incremental algorithm (assign / create / consolidate)
+over the 72h window with `lineage_of` for continuing stories. The remaining §6.3
+mitigations — excluding round-up/live-blog boilerplate from centroids, and
+down-weighting high-frequency entities — are deferred until calibration shows
+they are needed. Threshold calibration itself (SPEC 6.2: sweep 0.74–0.90, label
+100 assignments per setting on Neon branches, verify cross-lingually) is an
+inherently manual procedure done once real data exists; the thresholds are
+exposed as constants in `lib/clustering.ts` for that sweep.
+
 ## D-006 — Local development on Node 24
 
 **Status:** accepted · **Phase:** infrastructure
