@@ -52,6 +52,27 @@ The `Intl` call in SPEC 10.2 can format midnight as "24" under `en-CA` with
 adds an injectable `now` parameter for deterministic tests. Behaviour is
 otherwise identical to the spec listing.
 
+## D-007 — Language uses declared/outlet value; text detection deferred
+
+**Status:** accepted · **Phase:** 1
+
+SPEC 5.3 specifies feed-declared language, else text-based detection on
+headline+standfirst. `resolveLanguage` uses the feed declaration, else the
+outlet's primary language, and defers text detection to a later refinement rather
+than add a detection dependency now. Clustering is language-agnostic (multilingual
+embeddings), so a wrong `language` tag affects display, not cluster assignment;
+the field can be back-filled when detection is added.
+
+## D-008 — URL cleaning strips tracking params; redirect-hop resolution deferred
+
+**Status:** accepted · **Phase:** 1
+
+SPEC 5.3 lists two `url` rules: strip tracking parameters, and resolve one
+redirect hop. `cleanUrl` implements the first (a superset — utm_*, fbclid, ref,
+plus gclid/mc_cid/mc_eid). Redirect-hop resolution is deferred: it costs one
+network round-trip per item and is not needed for storage or attribution, which
+use the publisher's own link. It can be added in the ingest path later.
+
 ## D-006 — Local development on Node 24
 
 **Status:** accepted · **Phase:** infrastructure
