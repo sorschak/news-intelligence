@@ -1,0 +1,25 @@
+# Secrets / local env (Next.js convention)
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Next.js (interface, Phase 5)
+.next/
+out/
+.vercel/
+
+# Logs / editor / OS
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local archives
+*.zip
