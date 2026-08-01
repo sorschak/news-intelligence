@@ -136,6 +136,36 @@ DOI to its venue needs an external lookup (e.g. Crossref) and is deferred; a
 bare DOI currently takes the 0.50 base. `hasIndependentExpertComment` and
 `mentionsReplication` are set by analysis (Phase 4); false until then.
 
+## D-015 — Model IDs default to Sonnet 5 (scoring) and Opus 5 (synthesis)
+
+**Status:** accepted · **Phase:** 4
+
+SPEC 3.2 names "Claude Sonnet" for per-cluster scoring and "Claude Opus" for the
+daily synthesis without pinning IDs. `ANALYSIS_MODEL` defaults to
+`claude-sonnet-5` and `SYNTHESIS_MODEL` (Phase 5) to `claude-opus-5` — the
+current Sonnet/Opus IDs — both overridable via env. This keeps the cost profile
+the spec intends (cheap high-volume scoring, one premium synthesis call/day).
+
+## D-016 — Scoring runs thinking-disabled with JSON-parsed output
+
+**Status:** accepted · **Phase:** 4
+
+Sonnet 5 enables adaptive thinking by default. For ~250 scoring calls/day the
+analysis client sets `thinking: {type: "disabled"}` to control cost; the detailed
+versioned prompt carries the judgment. Output is parsed as JSON (the prompt
+mandates JSON-only), with code-fence stripping as a tolerance. Structured-output
+enforcement (`output_config.format`) is a straightforward future hardening if the
+inter-run variance exit criterion (SPEC 8.1 / FR-07) needs it.
+
+## D-017 — numeric_claim.item_id via model-supplied item index
+
+**Status:** accepted · **Phase:** 4
+
+`numeric_claim.item_id` is NOT NULL, but claims are extracted from the combined
+cluster text. The claims prompt returns an `item_index` per claim; the analysis
+job maps it back to the originating item's id and `published_at` (its `as_of`).
+Out-of-range indices are skipped rather than misattributed.
+
 ## D-006 — Local development on Node 24
 
 **Status:** accepted · **Phase:** infrastructure

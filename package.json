@@ -16,11 +16,13 @@
     "ingest": "tsx src/jobs/ingest.ts",
     "cluster": "tsx src/jobs/cluster.ts",
     "enrich": "tsx src/jobs/enrich.ts",
+    "analyse": "tsx src/jobs/analyse.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.68.0",
     "dotenv": "^16.4.7",
     "node-pg-migrate": "^7.9.0",
     "postgres": "^3.4.5",

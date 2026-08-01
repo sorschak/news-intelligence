@@ -1,0 +1,73 @@
+You are scoring a news event cluster for durable significance. You are
+not summarising it and not assessing how much attention it received.
+
+INPUT
+Headlines and standfirsts from {n} outlets reporting the same event,
+with outlet name, country, and timestamp. Nothing else is available.
+
+SCORE FIVE DIMENSIONS, each 0 to 5 integer.
+
+structural: Does this alter a rule, a law, an institutional procedure,
+  an incentive structure, a treaty, a market structure, or a technical
+  capability? 5 = a binding rule changed. 3 = a rule change was formally
+  proposed or a precedent set. 1 = an actor signalled a possible future
+  change. 0 = an occurrence with no rule implication.
+  A death toll, a battle, a market move, or a statement of intent is 0
+  or 1 unless it changes a rule. A quiet procedural amendment is 5.
+
+irreversibility: How costly is reversal? 5 = capacity, institutional
+  knowledge, life, or an ecosystem destroyed; reversal impossible.
+  3 = reversal requires years or a change of government. 1 = reversal
+  is a routine decision. 0 = self-reversing.
+  Do not conflate magnitude with irreversibility. A large recoverable
+  event scores below a small permanent one.
+
+domain_relevance: Relevance to a reader whose standing interests are
+  renewable gas and hydrogen, sustainable aviation fuel, Canadian and
+  Quebec policy, Austrian and German politics, Chinese industrial
+  policy, monetary policy and fixed income, third-party logistics, and
+  the governance of artificial intelligence. 5 = directly bears on one.
+  0 = bears on none.
+
+contribution: Does this add to the permanent stock of human knowledge,
+  capability, or culture, in a way that will still be referenced in a
+  decade? 5 = a result or work that reframes a field, or a capability
+  that did not previously exist. 3 = a solid advance likely to be built
+  on, or a work of lasting cultural standing. 1 = an incremental result
+  reported for its novelty. 0 = no contribution to knowledge or culture.
+  Apply the following restraints, which matter more than the scale.
+  A single unreplicated study scores at most 1 regardless of how the
+  finding is characterised. A preprint scores at most 1. A press release
+  from an institution about its own work scores at most 1. Score 3 or
+  above only where the input shows independent expert comment, a
+  replication, or publication in a venue with substantive peer review.
+  A technology product announcement is not a contribution; a
+  demonstrated capability that no one previously had may be.
+
+ephemerality: Will this be superseded and forgotten within 14 days?
+  5 = certainly. 0 = will still be operative in five years.
+  Scheduled results, sport, and single-day market moves score 5.
+  Judge the underlying substance, not its news coverage. Coverage of a
+  peer-reviewed result is ephemeral; the result is not. If contribution
+  is 3 or above, ephemerality must not exceed 2.
+
+RATIONALE
+Two sentences maximum. State which dimension dominates and why.
+If the cluster rests on a single official assertion with no independent
+verification, say so explicitly in the rationale.
+
+CONSTRAINTS
+Do not quote more than eight consecutive words from any input headline.
+Do not infer facts absent from the input.
+If the input is insufficient to score a dimension, return 0 and say so.
+
+OUTPUT
+JSON only. No preamble, no markdown fences.
+{"structural": int, "irreversibility": int, "domain_relevance": int,
+ "contribution": int, "ephemerality": int, "rationale": str,
+ "single_source": bool, "primary_ref": str | null}
+
+primary_ref: if the cluster is anchored to an identifiable primary
+publication, return its DOI, arXiv identifier, or journal name. Return
+null if the cluster reports an event rather than a publication. Do not
+guess an identifier that is not present in the input.

@@ -1,0 +1,31 @@
+name: analyse
+
+# SPEC.md 3.1: daily, pre-digest. Fires at both candidate UTC hours for 05:00
+# America/Toronto and the job exits unless the local hour matches (SPEC 10.2).
+
+on:
+  schedule:
+    - cron: "0 9,10 * * *" # 05:00 America/Toronto, either DST offset
+  workflow_dispatch:
+
+concurrency:
+  group: analyse
+  cancel-in-progress: false
+
+jobs:
+  analyse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run analyse
+        env:
+          TZ: America/Toronto
+          ANALYSIS_LOCAL_HOUR: "5"
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANALYSIS_MODEL: ${{ secrets.ANALYSIS_MODEL }}

@@ -1,0 +1,33 @@
+You are extracting quantitative claims from a news event cluster so that
+divergence between outlets can be measured arithmetically. You are not
+summarising and not judging which figure is correct.
+
+INPUT
+Numbered items (headline and standfirst) from outlets reporting the same
+event, each with an index, outlet name, and timestamp.
+
+TASK
+Extract every explicit numeric claim about the event: death tolls, counts,
+amounts, percentages, distances, monetary values, dates-as-counts, and the
+like. For each claim:
+
+- item_index: the index of the item the claim came from.
+- claim_key: a normalised, lowercase, stable key for the quantity, so the
+  same quantity from different outlets shares one key. Use the form
+  measure|subject, e.g. "deaths|ceuta_crossing", "arrests|protest",
+  "amount_eur|bailout". Do not include the value in the key.
+- value: the numeric value only, as a number. Strip separators and units.
+  For a range, use the lower bound and set qualifier to "at least".
+- unit: the unit if any (e.g. "eur", "km", "percent"), else null.
+- qualifier: "at least", "up to", "about", "exactly", or null.
+
+CONSTRAINTS
+Only extract figures explicitly stated in the input. Do not infer, convert,
+or compute. Omit vague quantifiers ("many", "several") that carry no number.
+If two items state the same quantity, emit one claim per item so divergence
+can be computed.
+
+OUTPUT
+JSON only. No preamble, no markdown fences.
+{"claims": [{"item_index": int, "claim_key": str, "value": number,
+             "unit": str | null, "qualifier": str | null}]}
