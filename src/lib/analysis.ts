@@ -31,6 +31,7 @@ export function promptHash(text: string): string {
 
 export const SCORE_PROMPT = loadPrompt("score.txt");
 export const CLAIMS_PROMPT = loadPrompt("claims.txt");
+export const OVERVIEW_PROMPT = loadPrompt("overview.txt");
 export const SCORE_PROMPT_HASH = promptHash(SCORE_PROMPT);
 
 let client: Anthropic | null = null;
@@ -42,6 +43,12 @@ function anthropic(): Anthropic {
 function analysisModel(): string {
   return optionalEnv("ANALYSIS_MODEL", "claude-sonnet-5");
 }
+
+function synthesisModel(): string {
+  return optionalEnv("SYNTHESIS_MODEL", "claude-opus-5");
+}
+
+export type OverviewCluster = { rationale: string; dominant: string };
 
 export type ClusterItemInput = {
   index: number;
@@ -134,4 +141,19 @@ export async function extractClaims(items: ClusterItemInput[]): Promise<RawClaim
   });
   const parsed = parseJsonBlock<{ claims: RawClaim[] }>(textOf(message));
   return Array.isArray(parsed.claims) ? parsed.claims : [];
+}
+
+/** Single daily overview paragraph over the top clusters, via Claude Opus (SPEC 9.1). */
+export async function synthesizeOverview(clusters: OverviewCluster[]): Promise<string> {
+  if (clusters.length === 0) return "No clusters cleared the threshold for today's digest.";
+  const body = clusters
+    .map((c, i) => `${i + 1}. [dominant: ${c.dominant}] ${c.rationale}`)
+    .join("\n");
+  const message = await anthropic().messages.create({
+    model: synthesisModel(),
+    max_tokens: 1024,
+    system: OVERVIEW_PROMPT,
+    messages: [{ role: "user", content: `Today's top clusters:\n\n${body}` }],
+  });
+  return textOf(message).trim();
 }

@@ -166,6 +166,46 @@ cluster text. The claims prompt returns an `item_index` per claim; the analysis
 job maps it back to the originating item's id and `published_at` (its `as_of`).
 Out-of-range indices are skipped rather than misattributed.
 
+## D-018 — Digest rendered as a static HTML string, no template engine
+
+**Status:** accepted · **Phase:** 5
+
+SPEC 3.2 specifies "server-rendered HTML in the deliver job; the digest is a
+static artefact persisted to digest.html". `lib/digest.ts` renders with plain
+string-building functions rather than Jinja2/React. The two compliance controls
+(25-word excerpt cap, mandatory outlet+timestamp+link, single-source
+attribution) live in `renderItem`, so the template cannot forget them (SPEC 9.3).
+
+## D-019 — Mail provider configurable; defaults to Resend
+
+**Status:** accepted · **Phase:** 5
+
+SPEC names "a transactional mail API" without pinning one. `lib/mail.ts` supports
+`resend` (default) and `postmark` via `MAIL_PROVIDER`, using `fetch` (no SDK
+dependency). Adding another provider is a new `case`.
+
+## D-020 — Hold-and-rescore lives in the deliver job
+
+**Status:** accepted · **Phase:** 5
+
+The §9.4 state machine (open → held at salience ≥ 0.55; held → released after 7
+days if the rescore holds, else back to open) runs in `jobs/deliver.ts`. Rescore
+is a bounded model call over held clusters past `held_until`, upserting
+`cluster_score` (ON CONFLICT DO UPDATE, since v1.2's UNIQUE(cluster_id,
+prompt_hash) permits one row per prompt version). Held clusters are withheld from
+the day's digest; released ones populate the "Held and released" section.
+
+## D-021 — Vercel Next.js UI (archive + Phase 5a feedback) deferred to a Vercel step
+
+**Status:** accepted · **Phase:** 5 / 5a
+
+Phase 5's delivery pipeline and the digest archive *storage* (the `digest` table)
+are built here. The Vercel Next.js **archive UI** (FR-13) and the Phase 5a
+**feedback route handlers** (SPEC 9.5.4) are one front-end surface; both are built
+together when Vercel is provisioned, to avoid introducing Next.js/React build
+config before it is exercised. The exit-criterion path (14 digests delivered +
+archived) does not depend on the UI.
+
 ## D-006 — Local development on Node 24
 
 **Status:** accepted · **Phase:** infrastructure

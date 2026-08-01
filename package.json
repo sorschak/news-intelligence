@@ -17,6 +17,7 @@
     "cluster": "tsx src/jobs/cluster.ts",
     "enrich": "tsx src/jobs/enrich.ts",
     "analyse": "tsx src/jobs/analyse.ts",
+    "deliver": "tsx src/jobs/deliver.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run"
