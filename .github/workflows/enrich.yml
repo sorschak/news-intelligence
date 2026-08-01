@@ -1,0 +1,27 @@
+name: enrich
+
+# SPEC.md 3.1: hourly. Originator classification, corroboration index, and
+# best-effort GDELT volume. Not gated on local hour.
+
+on:
+  schedule:
+    - cron: "20 * * * *" # hourly, offset from ingest/cluster
+  workflow_dispatch:
+
+concurrency:
+  group: enrich
+  cancel-in-progress: false
+
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run enrich
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

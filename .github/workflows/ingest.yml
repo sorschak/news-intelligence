@@ -1,0 +1,29 @@
+name: ingest
+
+# SPEC.md 3.1 / 10.3: every 30 minutes (fits the free Actions allowance on a
+# private repo, ~1,440 min/month). Ingestion is not gated on local hour.
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+# Avoid overlapping runs if one poll is slow.
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run ingest
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          FEED_CONTACT_EMAIL: ${{ secrets.FEED_CONTACT_EMAIL }}

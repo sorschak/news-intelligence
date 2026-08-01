@@ -1,0 +1,30 @@
+name: cluster
+
+# SPEC.md 3.1: every 30 minutes, shortly after ingest. Not gated on local hour.
+
+on:
+  schedule:
+    - cron: "10,40 * * * *" # offset from ingest so items exist before clustering
+  workflow_dispatch:
+
+concurrency:
+  group: cluster
+  cancel-in-progress: false
+
+jobs:
+  cluster:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run cluster
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          EMBEDDING_PROVIDER: ${{ secrets.EMBEDDING_PROVIDER }}
+          EMBEDDING_API_KEY: ${{ secrets.EMBEDDING_API_KEY }}
+          EMBEDDING_MODEL: ${{ secrets.EMBEDDING_MODEL }}
+          EMBEDDING_DIMS: ${{ secrets.EMBEDDING_DIMS }}
