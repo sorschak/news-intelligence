@@ -3,8 +3,10 @@ name: cluster
 # SPEC.md 3.1: every 30 minutes, shortly after ingest. Not gated on local hour.
 
 on:
-  schedule:
-    - cron: "10,40 * * * *" # offset from ingest so items exist before clustering
+  # Schedule disabled during the ingest soak. Re-enable once EMBEDDING_API_KEY /
+  # EMBEDDING_MODEL are set as repo secrets (Phase 2).
+  # schedule:
+  #   - cron: "10,40 * * * *" # offset from ingest so items exist before clustering
   workflow_dispatch:
 
 concurrency:

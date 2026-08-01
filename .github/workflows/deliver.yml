@@ -4,8 +4,10 @@ name: deliver
 # hours and the job exits unless the local hour matches.
 
 on:
-  schedule:
-    - cron: "0 10,11 * * *" # 06:00 America/Toronto, either DST offset
+  # Schedule disabled during the ingest soak. Re-enable once MAIL_* secrets are
+  # set and the analysis pass is producing scores (Phase 5).
+  # schedule:
+  #   - cron: "0 10,11 * * *" # 06:00 America/Toronto, either DST offset
   workflow_dispatch:
 
 concurrency:

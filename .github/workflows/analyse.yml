@@ -4,8 +4,10 @@ name: analyse
 # America/Toronto and the job exits unless the local hour matches (SPEC 10.2).
 
 on:
-  schedule:
-    - cron: "0 9,10 * * *" # 05:00 America/Toronto, either DST offset
+  # Schedule disabled during the ingest soak. Re-enable once ANTHROPIC_API_KEY is
+  # set and clustering is producing clusters (Phase 4).
+  # schedule:
+  #   - cron: "0 9,10 * * *" # 05:00 America/Toronto, either DST offset
   workflow_dispatch:
 
 concurrency:
