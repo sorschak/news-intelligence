@@ -9,6 +9,8 @@
  * kind): a second run on the same day is a no-op.
  */
 
+import { writeFileSync } from "node:fs";
+
 import { SCORE_PROMPT_HASH, scoreCluster, synthesizeOverview } from "../lib/analysis.js";
 import { closeSql, getSql, type Sql } from "../lib/db.js";
 import {
@@ -151,9 +153,16 @@ async function operationsLine(sql: Sql): Promise<string> {
 }
 
 async function main(): Promise<void> {
+  // Preview mode (DELIVER_PREVIEW=1): render the digest HTML to a file only — no
+  // hold/rescore mutations, no mail, no archive write. Forced runs skip the guard.
+  const preview = optionalEnv("DELIVER_PREVIEW", "") === "1";
+  const forced =
+    preview ||
+    optionalEnv("FORCE_RUN", "") === "1" ||
+    optionalEnv("GITHUB_EVENT_NAME", "") === "workflow_dispatch";
   const tz = optionalEnv("TZ", "America/Toronto");
   const targetHour = Number(optionalEnv("TARGET_LOCAL_HOUR", "6"));
-  if (!shouldRunNow(targetHour, tz)) {
+  if (!forced && !shouldRunNow(targetHour, tz)) {
     console.log(`deliver: not ${targetHour}:00 ${tz}; exiting.`);
     return;
   }
@@ -161,13 +170,15 @@ async function main(): Promise<void> {
   const sql = getSql();
   const editionDate = localDate(tz);
 
-  const existing = await sql<{ id: string }[]>`
-    SELECT id FROM digest WHERE edition_date = ${editionDate} AND kind = 'daily'
-  `;
-  if (existing.length > 0) {
-    console.log(`deliver: digest for ${editionDate} already exists; nothing to do.`);
-    await closeSql();
-    return;
+  if (!preview) {
+    const existing = await sql<{ id: string }[]>`
+      SELECT id FROM digest WHERE edition_date = ${editionDate} AND kind = 'daily'
+    `;
+    if (existing.length > 0) {
+      console.log(`deliver: digest for ${editionDate} already exists; nothing to do.`);
+      await closeSql();
+      return;
+    }
   }
 
   const rows = await sql<CandidateRow[]>`
@@ -229,6 +240,13 @@ async function main(): Promise<void> {
   const released: ScoredCluster[] = [];
   for (const row of rows) {
     const scored = toScored(row, divergent);
+
+    if (preview) {
+      // No state changes in preview: include everything not currently held.
+      if (row.state !== "held") pool.push(scored);
+      continue;
+    }
+
     const heldElapsed = row.held_until ? new Date(row.held_until).getTime() <= Date.now() : false;
 
     if (row.state === "held" && heldElapsed) {
@@ -265,6 +283,16 @@ async function main(): Promise<void> {
 
   const html = renderDigestHtml({ editionDate, overview, operations, sections });
   const clusterIds = digestClusterIds(sections);
+
+  if (preview) {
+    const path = optionalEnv("DELIVER_PREVIEW_PATH", "digest-preview.html");
+    writeFileSync(path, html, "utf8");
+    console.log(
+      `deliver(preview): wrote ${clusterIds.length}-cluster digest to ${path} (no mail, no archive).`,
+    );
+    await closeSql();
+    return;
+  }
 
   const send = await sendDigest(`News Intelligence — ${editionDate}`, html);
   if (!send.ok) {
