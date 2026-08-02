@@ -186,3 +186,66 @@ export function renderDigestHtml(input: DigestInput): string {
     "</body></html>",
   ].join("");
 }
+
+// ---------------------------------------------------------------------------
+// Counter-bias edition (SPEC.md 9.5.5) — Phase 5a
+// ---------------------------------------------------------------------------
+
+/** A withheld item plus its two signed feedback links. `cluster.salience` holds salience_undomained here. */
+export type CounterItem = {
+  cluster: ScoredCluster;
+  valuedUrl: string;
+  indifferentUrl: string;
+};
+
+export type CounterDigestInput = {
+  editionDate: string;
+  suppressionRate: number;
+  poolSize: number;
+  comparison: string; // one line comparing with preceding editions
+  withheld: CounterItem[];
+  contribution: ScoredCluster[];
+  coverageGaps: string[];
+};
+
+function renderCounterItem(item: CounterItem): string {
+  const c = item.cluster;
+  const excerpt = c.standfirst ? capWords(c.standfirst) : "";
+  return [
+    "<li>",
+    `<a href="${esc(c.url)}">${esc(c.headline)}</a>`,
+    ` — ${esc(c.outlet)}, ${fmtTime(c.publishedAt)}`,
+    excerpt ? `<div class="excerpt">${esc(excerpt)}</div>` : "",
+    `<div class="meta">undomained salience ${c.salience.toFixed(3)} · corroboration ${c.corroboration.toFixed(2)}</div>`,
+    `<div class="feedback"><a href="${esc(item.valuedUrl)}">worth seeing</a> · <a href="${esc(item.indifferentUrl)}">indifferent</a></div>`,
+    "</li>",
+  ].join("");
+}
+
+/** Render the fortnightly counter-bias edition (SPEC 9.5.5). */
+export function renderCounterHtml(input: CounterDigestInput): string {
+  const gaps = input.coverageGaps.length ? input.coverageGaps.join(", ") : "none identified";
+  return [
+    "<!doctype html>",
+    '<html lang="en"><head><meta charset="utf-8">',
+    `<title>Counter-bias edition — ${esc(input.editionDate)}</title>`,
+    "<style>body{font:16px/1.5 Georgia,serif;max-width:44rem;margin:2rem auto;padding:0 1rem}",
+    "h1{font-size:1.4rem}h2{font-size:1.1rem;border-bottom:1px solid #ccc;padding-bottom:.2rem}",
+    ".excerpt{color:#333;margin:.2rem 0}.meta{color:#777;font-size:.8rem}.feedback{font-size:.85rem;margin:.2rem 0}",
+    "footer{color:#777;font-size:.8rem;border-top:1px solid #ccc;margin-top:2rem;padding-top:.5rem}</style>",
+    "</head><body>",
+    `<h1>Counter-bias edition — ${esc(input.editionDate)}</h1>`,
+    "<section><h2>Suppression report</h2>",
+    `<p>Suppression rate: <strong>${input.suppressionRate.toFixed(3)}</strong> — the fraction of the top decile by unpersonalised salience that never reached you.<br>`,
+    `Pool: ${input.poolSize} clusters scored in the trailing 14 days.<br>`,
+    `${esc(input.comparison)}</p></section>`,
+    input.withheld.length
+      ? `<section><h2>Withheld items</h2><ul>${input.withheld.map(renderCounterItem).join("")}</ul></section>`
+      : "",
+    input.contribution.length
+      ? `<section><h2>Contribution</h2><ul>${input.contribution.map(renderItem).join("")}</ul></section>`
+      : "",
+    `<section><h2>Coverage gaps</h2><p>${esc(gaps)}</p></section>`,
+    "</body></html>",
+  ].join("");
+}

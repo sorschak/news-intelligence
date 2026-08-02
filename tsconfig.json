@@ -3,18 +3,43 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "lib": ["ES2023"],
-    "types": ["node"],
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "jsx": "react-jsx",
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
     "verbatimModuleSyntax": true,
+    "isolatedModules": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "allowJs": true,
+    "incremental": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["src", "tests", "*.config.ts", "eslint.config.mjs"]
+  "include": [
+    "src",
+    "tests",
+    "app",
+    "*.config.ts",
+    "eslint.config.mjs",
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next"
+  ]
 }
