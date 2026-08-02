@@ -59,7 +59,7 @@ const paper = (
   homepage,
 });
 
-// SPEC.md Section 11 — ~51 outlets.
+// SPEC.md Section 11 — ~55 outlets.
 export const OUTLETS: readonly OutletSeed[] = [
   wire("Reuters", "Global", "GB", "en", "https://www.reuters.com"),
   wire("Associated Press", "Global", "US", "en", "https://apnews.com"),
@@ -112,6 +112,12 @@ export const OUTLETS: readonly OutletSeed[] = [
   paper("Nature news", "UK", "GB", "en", "https://www.nature.com/news", true),
   paper("Science news", "US", "US", "en", "https://www.science.org/news", true),
   paper("Bellingcat", "Netherlands", "NL", "en", "https://www.bellingcat.com", true),
+  // Clean-energy / climate specialists — the domain focus (hydrogen, SAF, the
+  // energy transition). All carry a verified public RSS feed.
+  paper("Canary Media", "US", "US", "en", "https://www.canarymedia.com", true),
+  paper("Utility Dive", "US", "US", "en", "https://www.utilitydive.com", true),
+  paper("Carbon Brief", "UK", "GB", "en", "https://www.carbonbrief.org", true),
+  paper("pv magazine", "Global", "DE", "en", "https://www.pv-magazine.com", true),
 ];
 
 /** Homepage for a seeded outlet name (used by discovery), or null. */

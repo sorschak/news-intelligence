@@ -174,6 +174,65 @@ export const CURATED_FEEDS: readonly CuratedFeed[] = [
   { outlet: "South China Morning Post", url: "https://www.scmp.com/rss/92/feed", section: "asia" },
   { outlet: "South China Morning Post", url: "https://www.scmp.com/rss/5/feed", section: "business" },
 
+  // Fourth pass — specialist and non-Anglophone coverage (every URL verified
+  // against its live endpoint on 2026-08-02). This rebalances the set away from
+  // the Anglophone giants toward the domain focus (clean energy, EU/DACH and
+  // Quebec politics, industrial policy) and strengthens cross-lingual
+  // corroboration. Outlets whose feeds could not be reached (Caixin, Lawfare,
+  // Hydrogen Insight, Recharge, Kyiv Independent, Asahi AJW, Haaretz — no public
+  // RSS or a hard bot block) are left to auto-discovery.
+
+  // Germany / Austria / Switzerland (German-language)
+  { outlet: "Handelsblatt", url: "https://www.handelsblatt.com/contentexport/feed/schlagzeilen", section: "schlagzeilen" },
+  { outlet: "Handelsblatt", url: "https://www.handelsblatt.com/contentexport/feed/wirtschaft", section: "wirtschaft" },
+  { outlet: "Handelsblatt", url: "https://www.handelsblatt.com/contentexport/feed/unternehmen", section: "unternehmen" },
+  { outlet: "Handelsblatt", url: "https://www.handelsblatt.com/contentexport/feed/finanzen", section: "finanzen" },
+  { outlet: "Süddeutsche Zeitung", url: "https://rss.sueddeutsche.de/rss/Topthemen", section: "topthemen" },
+  { outlet: "Süddeutsche Zeitung", url: "https://rss.sueddeutsche.de/rss/Wirtschaft", section: "wirtschaft" },
+  { outlet: "Süddeutsche Zeitung", url: "https://rss.sueddeutsche.de/rss/Politik", section: "politik" },
+  { outlet: "Neue Zürcher Zeitung", url: "https://www.nzz.ch/recent.rss", section: "recent" },
+  { outlet: "Neue Zürcher Zeitung", url: "https://www.nzz.ch/international.rss", section: "international" },
+  { outlet: "Neue Zürcher Zeitung", url: "https://www.nzz.ch/wirtschaft.rss", section: "wirtschaft" },
+  { outlet: "Der Standard", url: "https://www.derstandard.at/rss/international", section: "international" },
+  { outlet: "Der Standard", url: "https://www.derstandard.at/rss/inland", section: "inland" },
+  { outlet: "Der Standard", url: "https://www.derstandard.at/rss/wirtschaft", section: "wirtschaft" },
+  { outlet: "Die Presse", url: "https://www.diepresse.com/rss/wirtschaft", section: "wirtschaft" },
+  { outlet: "Die Presse", url: "https://www.diepresse.com/rss/politik", section: "politik" },
+
+  // France / EU
+  { outlet: "Politico Europe", url: "https://www.politico.eu/feed/", section: "main" },
+
+  // Canada / Quebec
+  { outlet: "La Presse", url: "https://www.lapresse.ca/actualites/rss", section: "actualites" },
+  { outlet: "La Presse", url: "https://www.lapresse.ca/affaires/rss", section: "affaires" },
+  { outlet: "La Presse", url: "https://www.lapresse.ca/international/rss", section: "international" },
+  { outlet: "The Globe and Mail", url: "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/canada/", section: "canada" },
+  { outlet: "The Globe and Mail", url: "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/business/", section: "business" },
+  { outlet: "The Globe and Mail", url: "https://www.theglobeandmail.com/arc/outboundfeeds/rss/category/world/", section: "world" },
+  { outlet: "National Post", url: "https://nationalpost.com/feed/", section: "main" },
+
+  // Europe (other languages) + Russia-in-exile
+  { outlet: "Corriere della Sera", url: "https://xml2.corriereobjects.it/rss/homepage.xml", section: "homepage" },
+  { outlet: "Meduza", url: "https://meduza.io/rss/en/all", section: "all" },
+
+  // Asia-Pacific
+  { outlet: "The Straits Times", url: "https://www.straitstimes.com/news/world/rss.xml", section: "world" },
+  { outlet: "Australian Financial Review", url: "https://www.afr.com/rss/feed.xml", section: "main" },
+
+  // Specialist science / technology / investigative (primary_publication basis)
+  { outlet: "Nature news", url: "https://www.nature.com/nature.rss", section: "news" },
+  { outlet: "Science news", url: "https://www.science.org/rss/news_current.xml", section: "news" },
+  { outlet: "MIT Technology Review", url: "https://www.technologyreview.com/feed/", section: "main" },
+  { outlet: "STAT News", url: "https://www.statnews.com/feed/", section: "main" },
+  { outlet: "ProPublica", url: "https://www.propublica.org/feeds/propublica/main", section: "main" },
+  { outlet: "Bellingcat", url: "https://www.bellingcat.com/feed/", section: "main" },
+
+  // Clean-energy / climate specialists (new outlets in registry.ts) — the domain focus
+  { outlet: "Canary Media", url: "https://www.canarymedia.com/articles.rss", section: "main" },
+  { outlet: "Utility Dive", url: "https://www.utilitydive.com/feeds/news/", section: "news" },
+  { outlet: "Carbon Brief", url: "https://www.carbonbrief.org/feed/", section: "main" },
+  { outlet: "pv magazine", url: "https://www.pv-magazine.com/feed/", section: "main" },
+
 ];
 
 // Note: CBC uses the cbc.ca/webfeed/rss/rss-* endpoints above (the older
