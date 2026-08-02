@@ -45,12 +45,13 @@ export const CURATED_FEEDS: readonly CuratedFeed[] = [
   { outlet: "The Washington Post", url: "https://feeds.washingtonpost.com/rss/national", section: "national" },
   { outlet: "The Washington Post", url: "https://feeds.washingtonpost.com/rss/politics", section: "politics" },
 
-  // CBC / Radio-Canada (feeds live at rss.cbc.ca/lineup/*.xml)
-  { outlet: "CBC / Radio-Canada", url: "https://rss.cbc.ca/lineup/world.xml", section: "world" },
-  { outlet: "CBC / Radio-Canada", url: "https://rss.cbc.ca/lineup/business.xml", section: "business" },
-  { outlet: "CBC / Radio-Canada", url: "https://rss.cbc.ca/lineup/politics.xml", section: "politics" },
-  { outlet: "CBC / Radio-Canada", url: "https://rss.cbc.ca/lineup/canada.xml", section: "canada" },
-  { outlet: "CBC / Radio-Canada", url: "https://rss.cbc.ca/lineup/technology.xml", section: "technology" },
+  // CBC / Radio-Canada (canonical webfeed endpoints; see cbc.ca/rss)
+  { outlet: "CBC / Radio-Canada", url: "https://www.cbc.ca/webfeed/rss/rss-topstories", section: "topstories" },
+  { outlet: "CBC / Radio-Canada", url: "https://www.cbc.ca/webfeed/rss/rss-world", section: "world" },
+  { outlet: "CBC / Radio-Canada", url: "https://www.cbc.ca/webfeed/rss/rss-canada", section: "canada" },
+  { outlet: "CBC / Radio-Canada", url: "https://www.cbc.ca/webfeed/rss/rss-politics", section: "politics" },
+  { outlet: "CBC / Radio-Canada", url: "https://www.cbc.ca/webfeed/rss/rss-business", section: "business" },
+  { outlet: "CBC / Radio-Canada", url: "https://www.cbc.ca/webfeed/rss/rss-technology", section: "technology" },
 
   // Le Monde
   { outlet: "Le Monde", url: "https://www.lemonde.fr/rss/une.xml", section: "une" },
@@ -107,9 +108,76 @@ export const CURATED_FEEDS: readonly CuratedFeed[] = [
   { outlet: "The Guardian", url: "https://www.theguardian.com/global-development/rss", section: "global-development" },
   { outlet: "The Guardian", url: "https://www.theguardian.com/politics/rss", section: "politics" },
 
+  // Second curation pass — more section feeds to reach the 140-feed target (SPEC 13).
+  { outlet: "The Guardian", url: "https://www.theguardian.com/australia-news/rss", section: "australia" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/society/rss", section: "society" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/money/rss", section: "money" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/law/rss", section: "law" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/education/rss", section: "education" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/world/europe-news/rss", section: "europe" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/world/middleeast/rss", section: "middle-east" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/world/asia-pacific/rss", section: "asia" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/world/americas/rss", section: "americas" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/world/africa/rss", section: "africa" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/world/china/rss", section: "china" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/world/russia/rss", section: "russia" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/business/economics/rss", section: "economics" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/technology/artificialintelligenceai/rss", section: "ai" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/environment/climate-crisis/rss", section: "climate" },
+
+  { outlet: "The New York Times", url: "https://rss.nytimes.com/services/xml/rss/nyt/US.xml", section: "us" },
+  { outlet: "The New York Times", url: "https://rss.nytimes.com/services/xml/rss/nyt/Africa.xml", section: "africa" },
+  { outlet: "The New York Times", url: "https://rss.nytimes.com/services/xml/rss/nyt/Americas.xml", section: "americas" },
+  { outlet: "The New York Times", url: "https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml", section: "politics" },
+  { outlet: "The New York Times", url: "https://rss.nytimes.com/services/xml/rss/nyt/Health.xml", section: "health" },
+  { outlet: "The New York Times", url: "https://rss.nytimes.com/services/xml/rss/nyt/Space.xml", section: "space" },
+  { outlet: "The New York Times", url: "https://rss.nytimes.com/services/xml/rss/nyt/PersonalTech.xml", section: "personal-tech" },
+  { outlet: "The New York Times", url: "https://rss.nytimes.com/services/xml/rss/nyt/DealBook.xml", section: "dealbook" },
+  { outlet: "The New York Times", url: "https://rss.nytimes.com/services/xml/rss/nyt/Upshot.xml", section: "upshot" },
+
+  { outlet: "BBC News", url: "https://feeds.bbci.co.uk/news/health/rss.xml", section: "health" },
+  { outlet: "BBC News", url: "https://feeds.bbci.co.uk/news/education/rss.xml", section: "education" },
+  { outlet: "BBC News", url: "https://feeds.bbci.co.uk/news/world/latin_america/rss.xml", section: "latin-america" },
+  { outlet: "BBC News", url: "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml", section: "culture" },
+
+  { outlet: "Le Monde", url: "https://www.lemonde.fr/politique/rss_full.xml", section: "politique" },
+  { outlet: "Le Monde", url: "https://www.lemonde.fr/planete/rss_full.xml", section: "planete" },
+  { outlet: "Le Monde", url: "https://www.lemonde.fr/pixels/rss_full.xml", section: "tech" },
+
+  { outlet: "Frankfurter Allgemeine Zeitung", url: "https://www.faz.net/rss/aktuell/wirtschaft/", section: "wirtschaft" },
+  { outlet: "Frankfurter Allgemeine Zeitung", url: "https://www.faz.net/rss/aktuell/politik/", section: "politik" },
+  { outlet: "Frankfurter Allgemeine Zeitung", url: "https://www.faz.net/rss/aktuell/wissen/", section: "wissen" },
+
+  { outlet: "The Hindu", url: "https://www.thehindu.com/sci-tech/feeder/default.rss", section: "sci-tech" },
+  { outlet: "The Hindu", url: "https://www.thehindu.com/news/feeder/default.rss", section: "news" },
+
+  { outlet: "El País", url: "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/ciencia/portada", section: "ciencia" },
+  { outlet: "El País", url: "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada", section: "tecnologia" },
+
+  // Third pass — push over the 140-feed target.
+  { outlet: "The Guardian", url: "https://www.theguardian.com/world/ukraine/rss", section: "ukraine" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/world/india/rss", section: "india" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/world/france/rss", section: "france" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/world/germany/rss", section: "germany" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/inequality/rss", section: "inequality" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/commentisfree/rss", section: "opinion" },
+  { outlet: "The Guardian", url: "https://www.theguardian.com/cities/rss", section: "cities" },
+
+  { outlet: "The New York Times", url: "https://rss.nytimes.com/services/xml/rss/nyt/Education.xml", section: "education" },
+  { outlet: "The New York Times", url: "https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml", section: "sports" },
+  { outlet: "The New York Times", url: "https://rss.nytimes.com/services/xml/rss/nyt/Arts.xml", section: "arts" },
+  { outlet: "The New York Times", url: "https://rss.nytimes.com/services/xml/rss/nyt/Books.xml", section: "books" },
+
+  { outlet: "BBC News", url: "https://feeds.bbci.co.uk/news/rss.xml", section: "top" },
+
+  { outlet: "South China Morning Post", url: "https://www.scmp.com/rss/91/feed", section: "china" },
+  { outlet: "South China Morning Post", url: "https://www.scmp.com/rss/92/feed", section: "asia" },
+  { outlet: "South China Morning Post", url: "https://www.scmp.com/rss/5/feed", section: "business" },
+
 ];
 
-// Note: CBC feeds use the canonical rss.cbc.ca/lineup/*.xml endpoints above, but
-// CBC is unreachable from some networks (connection refused, not 404); it may
-// still resolve from the GitHub Actions runner. Reuters and Bloomberg are
+// Note: CBC uses the cbc.ca/webfeed/rss/rss-* endpoints above (the older
+// rss.cbc.ca/lineup/*.xml paths are deprecated / 404). CBC is unreachable from
+// some networks — connections hang with no response — so these are validated via
+// the GitHub Actions runner, not local runs. Reuters and Bloomberg are
 // intentionally absent — neither offers public RSS any longer.

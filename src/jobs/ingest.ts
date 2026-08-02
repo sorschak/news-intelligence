@@ -116,7 +116,13 @@ async function pollFeed(sql: Sql, feed: FeedRow, totals: Totals): Promise<void> 
   if (feed.last_modified) headers["if-modified-since"] = feed.last_modified;
 
   try {
-    const res = await request(feed.url, { method: "GET", headers, maxRedirections: 2 });
+    const res = await request(feed.url, {
+      method: "GET",
+      headers,
+      maxRedirections: 2,
+      headersTimeout: 15000,
+      bodyTimeout: 15000,
+    });
 
     if (res.statusCode === 304) {
       await markNotModified(sql, feed);
