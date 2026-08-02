@@ -111,7 +111,10 @@ function textOf(message: Anthropic.Message): string {
 }
 
 function clamp05(n: number): number {
-  return Math.max(0, Math.min(5, Math.round(n)));
+  const r = Math.round(n);
+  // A missing/non-numeric field would round to NaN and slip through min/max,
+  // poisoning salience, sorting, and every threshold downstream — clamp to 0.
+  return Number.isFinite(r) ? Math.max(0, Math.min(5, r)) : 0;
 }
 
 /** Score one cluster on the five dimensions (SPEC 8.1). */

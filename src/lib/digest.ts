@@ -8,6 +8,8 @@
  * on a single official statement are prefixed with the attributing outlet.
  */
 
+import type { Divergence } from "./divergence.js";
+
 export const HOLD_THRESHOLD = 0.55; // salience at/above which a cluster is held (SPEC 9.4)
 export const EXCERPT_MAX_WORDS = 25; // NFR-07
 
@@ -31,6 +33,7 @@ export type ScoredCluster = {
   rationale: string;
   singleSource: boolean;
   hasDivergence: boolean;
+  divergences?: Divergence[]; // ordered claim sequence, for the Divergence-watch section
   // Representative item, for display + attribution.
   headline: string;
   outlet: string;
@@ -101,6 +104,22 @@ function fmtTime(d: Date): string {
   return d.toISOString().replace("T", " ").slice(0, 16) + " UTC";
 }
 
+/**
+ * Render numeric-claim divergence as an ordered "how the figure moved" sequence
+ * (SPEC 8.3): outlet, value, and time in chronological order, per claim key. No
+ * averaging, no chosen figure — the sequence is the output.
+ */
+function renderDivergence(divs: Divergence[]): string {
+  return divs
+    .map((d) => {
+      const seq = d.sources
+        .map((s) => `${esc(s.outlet)} ${s.value} <span class="dtime">(${fmtTime(s.asOf)})</span>`)
+        .join(" → ");
+      return `<div class="divergence"><strong>${esc(d.key.replace("|", " · "))}</strong>: ${seq}</div>`;
+    })
+    .join("");
+}
+
 /** Render one item with mandatory outlet + timestamp + link (SPEC 9.3). */
 export function renderItem(c: ScoredCluster): string {
   const excerpt = c.standfirst ? capWords(c.standfirst) : "";
@@ -115,6 +134,10 @@ export function renderItem(c: ScoredCluster): string {
     `<a href="${esc(c.url)}">${esc(c.headline)}</a>`,
     ` — ${esc(c.outlet)}, ${fmtTime(c.publishedAt)}`,
     attributed ? `<div class="excerpt">${attributed}</div>` : "",
+    // The rationale is why the story ranks — the "better reason attached" that
+    // separates this from a ranked list (SPEC 9.1).
+    c.rationale ? `<div class="rationale">${esc(c.rationale)}</div>` : "",
+    c.divergences?.length ? renderDivergence(c.divergences) : "",
     `<div class="meta">salience ${c.salience.toFixed(3)} · corroboration ${c.corroboration.toFixed(2)} · ${c.originatorCount} originators</div>`,
     "</li>",
   ].join("");
@@ -172,6 +195,7 @@ export function renderDigestHtml(input: DigestInput): string {
     "<style>body{font:16px/1.5 Georgia,serif;max-width:44rem;margin:2rem auto;padding:0 1rem}",
     "h1{font-size:1.4rem}h2{font-size:1.1rem;border-bottom:1px solid #ccc;padding-bottom:.2rem}",
     ".excerpt{color:#333;margin:.2rem 0}.meta{color:#777;font-size:.8rem}",
+    ".rationale{color:#222;margin:.2rem 0}.divergence{color:#333;margin:.2rem 0;font-size:.9rem}.dtime{color:#999}",
     "footer{color:#777;font-size:.8rem;border-top:1px solid #ccc;margin-top:2rem;padding-top:.5rem}</style>",
     "</head><body>",
     `<h1>News Intelligence — ${esc(input.editionDate)}</h1>`,

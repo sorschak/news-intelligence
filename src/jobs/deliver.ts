@@ -20,7 +20,7 @@ import {
   renderDigestHtml,
   type ScoredCluster,
 } from "../lib/digest.js";
-import { divergence, type NumericClaim } from "../lib/divergence.js";
+import { divergence, type Divergence, type NumericClaim } from "../lib/divergence.js";
 import { optionalEnv } from "../lib/env.js";
 import { sendDigest } from "../lib/mail.js";
 import { scoreBoth, type Score } from "../lib/scoring.js";
@@ -65,7 +65,8 @@ function localDate(tz: string): string {
   }).format(new Date());
 }
 
-function toScored(row: CandidateRow, divergent: Set<string>): ScoredCluster {
+function toScored(row: CandidateRow, divergences: Map<string, Divergence[]>): ScoredCluster {
+  const divs = divergences.get(row.id);
   return {
     id: row.id,
     salience: Number(row.salience),
@@ -75,7 +76,8 @@ function toScored(row: CandidateRow, divergent: Set<string>): ScoredCluster {
     originatorCount: Number(row.originator_count),
     rationale: row.rationale,
     singleSource: row.single_source,
-    hasDivergence: divergent.has(row.id),
+    hasDivergence: (divs?.length ?? 0) > 0,
+    divergences: divs,
     headline: row.headline,
     outlet: row.outlet,
     outletTier: row.tier,
@@ -204,11 +206,12 @@ async function main(): Promise<void> {
     JOIN latest l ON l.cluster_id = c.id
     JOIN lead d ON d.cluster_id = c.id
     WHERE c.last_seen_at > now() - ${WINDOW}::interval
+       OR (c.state = 'held' AND c.held_until <= now())
   `;
 
-  // Divergence flags from stored numeric claims.
+  // Divergence sequences from stored numeric claims (SPEC 8.3).
   const ids = rows.map((r) => r.id);
-  const divergent = new Set<string>();
+  const divergences = new Map<string, Divergence[]>();
   if (ids.length > 0) {
     const claims = await sql<
       { cluster_id: string; claim_key: string; value: string; outlet: string; as_of: Date }[]
@@ -231,7 +234,8 @@ async function main(): Promise<void> {
       byCluster.set(c.cluster_id, bucket);
     }
     for (const [clusterId, list] of byCluster) {
-      if (divergence(list).length > 0) divergent.add(clusterId);
+      const divs = divergence(list);
+      if (divs.length > 0) divergences.set(clusterId, divs);
     }
   }
 
@@ -239,7 +243,7 @@ async function main(): Promise<void> {
   const pool: ScoredCluster[] = [];
   const released: ScoredCluster[] = [];
   for (const row of rows) {
-    const scored = toScored(row, divergent);
+    const scored = toScored(row, divergences);
 
     if (preview) {
       // No state changes in preview: include everything not currently held.

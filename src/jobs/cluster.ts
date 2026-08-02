@@ -110,6 +110,26 @@ async function consolidate(sql: Sql): Promise<number> {
     await sql.begin(async (tx) => {
       await tx`UPDATE item SET cluster_id = ${into} WHERE cluster_id = ${other}`;
       await tx`UPDATE cluster SET lineage_of = ${into} WHERE lineage_of = ${other}`;
+      // Re-point rows that reference the merged-away cluster. Without this, the
+      // DELETE below violates the foreign keys on numeric_claim / counter_feedback
+      // / cluster_score (none declare ON DELETE), which would crash every
+      // clustering run once a merged cluster had been scored.
+      await tx`UPDATE numeric_claim SET cluster_id = ${into} WHERE cluster_id = ${other}`;
+      // Move human feedback to the survivor, dropping any that would collide on
+      // its UNIQUE(digest_id, cluster_id).
+      await tx`
+        DELETE FROM counter_feedback cf
+        WHERE cf.cluster_id = ${other}
+          AND EXISTS (
+            SELECT 1 FROM counter_feedback c2
+            WHERE c2.cluster_id = ${into} AND c2.digest_id = cf.digest_id
+          )
+      `;
+      await tx`UPDATE counter_feedback SET cluster_id = ${into} WHERE cluster_id = ${other}`;
+      // The survivor's centroid and item_count just changed, so the merged-away
+      // cluster's scores are stale and are simply dropped; the survivor is
+      // re-scored on the next analyse run.
+      await tx`DELETE FROM cluster_score WHERE cluster_id = ${other}`;
       await tx`
         UPDATE cluster c
         SET centroid = sub.centroid, item_count = sub.cnt, last_seen_at = now()
