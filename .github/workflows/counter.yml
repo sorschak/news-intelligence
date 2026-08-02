@@ -1,13 +1,13 @@
 name: counter
 
 # SPEC.md 9.5.2: fortnightly, Sunday 07:00 America/Toronto. Actions cron can't
-# express "every 14 days", so when enabled this fires every Sunday at the two
-# candidate UTC hours and the job guards on local hour + Sunday; add a 14-day
-# parity check to the guard before enabling. Disabled during the ingest soak.
+# express "every 14 days", so this fires every Sunday at the two candidate UTC
+# hours and the job guards on local hour + Sunday + even-week parity (one Sunday
+# in two).
 
 on:
-  # schedule:
-  #   - cron: "0 11,12 * * 0" # 07:00 America/Toronto on Sundays, either DST offset
+  schedule:
+    - cron: "0 11,12 * * 0" # Sundays 07:00 America/Toronto; job guards fortnightly
   workflow_dispatch:
 
 concurrency:
@@ -30,9 +30,9 @@ jobs:
           COUNTER_LOCAL_HOUR: "7"
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
           FEEDBACK_SIGNING_SECRET: ${{ secrets.FEEDBACK_SIGNING_SECRET }}
-          MAIL_PROVIDER: ${{ secrets.MAIL_PROVIDER }}
           MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
-          MAIL_FROM: ${{ secrets.MAIL_FROM }}
-          DIGEST_RECIPIENT: ${{ secrets.DIGEST_RECIPIENT }}
+          APP_BASE_URL: https://news-intelligence-self.vercel.app
+          MAIL_PROVIDER: resend
+          MAIL_FROM: onboarding@resend.dev
+          DIGEST_RECIPIENT: kurt@sorschak.com

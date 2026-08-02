@@ -22,7 +22,7 @@ import {
 import { optionalEnv } from "../lib/env.js";
 import { signToken } from "../lib/feedback.js";
 import { sendDigest } from "../lib/mail.js";
-import { localHour, shouldRunNow } from "../lib/time.js";
+import { shouldRunNow } from "../lib/time.js";
 
 const WINDOW = "14 days";
 const COUNTER_SIZE_MAX = 10;
@@ -86,8 +86,11 @@ async function main(): Promise<void> {
   const isSunday =
     new Intl.DateTimeFormat("en-US", { timeZone: tz, weekday: "short" }).format(new Date()) ===
     "Sun";
-  if (!forced && (!shouldRunNow(targetHour, tz) || !isSunday)) {
-    console.log(`counter: not Sunday ${targetHour}:00 ${tz} (hour ${localHour(tz)}); exiting.`);
+  // Fortnightly cadence: the cron fires every Sunday, so gate to even-indexed
+  // weeks (whole weeks since the Unix epoch) — one Sunday in two.
+  const isFortnightWeek = Math.floor(Date.now() / (7 * 24 * 3600 * 1000)) % 2 === 0;
+  if (!forced && (!shouldRunNow(targetHour, tz) || !isSunday || !isFortnightWeek)) {
+    console.log(`counter: not the scheduled fortnightly Sunday ${targetHour}:00 ${tz}; exiting.`);
     return;
   }
 
