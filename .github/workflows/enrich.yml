@@ -4,10 +4,8 @@ name: enrich
 # best-effort GDELT volume. Not gated on local hour.
 
 on:
-  # Schedule disabled during the ingest soak (nothing to enrich until clustering
-  # runs). Re-enable alongside cluster (Phase 3).
-  # schedule:
-  #   - cron: "20 * * * *" # hourly, offset from ingest/cluster
+  schedule:
+    - cron: "20 * * * *" # hourly, offset from ingest/cluster
   workflow_dispatch:
 
 concurrency:

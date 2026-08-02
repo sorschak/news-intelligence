@@ -4,10 +4,8 @@ name: deliver
 # hours and the job exits unless the local hour matches.
 
 on:
-  # Schedule disabled during the ingest soak. Re-enable once MAIL_* secrets are
-  # set and the analysis pass is producing scores (Phase 5).
-  # schedule:
-  #   - cron: "0 10,11 * * *" # 06:00 America/Toronto, either DST offset
+  schedule:
+    - cron: "0 10,11 * * *" # 06:00 America/Toronto, either DST offset
   workflow_dispatch:
 
 concurrency:
@@ -30,9 +28,9 @@ jobs:
           TARGET_LOCAL_HOUR: "6"
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ANALYSIS_MODEL: ${{ secrets.ANALYSIS_MODEL }}
-          SYNTHESIS_MODEL: ${{ secrets.SYNTHESIS_MODEL }}
-          MAIL_PROVIDER: ${{ secrets.MAIL_PROVIDER }}
           MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
-          MAIL_FROM: ${{ secrets.MAIL_FROM }}
-          DIGEST_RECIPIENT: ${{ secrets.DIGEST_RECIPIENT }}
+          ANALYSIS_MODEL: claude-sonnet-5
+          SYNTHESIS_MODEL: claude-opus-5
+          MAIL_PROVIDER: resend
+          MAIL_FROM: onboarding@resend.dev
+          DIGEST_RECIPIENT: kurt@sorschak.com

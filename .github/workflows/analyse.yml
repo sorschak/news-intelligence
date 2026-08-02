@@ -4,10 +4,8 @@ name: analyse
 # America/Toronto and the job exits unless the local hour matches (SPEC 10.2).
 
 on:
-  # Schedule disabled during the ingest soak. Re-enable once ANTHROPIC_API_KEY is
-  # set and clustering is producing clusters (Phase 4).
-  # schedule:
-  #   - cron: "0 9,10 * * *" # 05:00 America/Toronto, either DST offset
+  schedule:
+    - cron: "0 9,10 * * *" # 05:00 America/Toronto, either DST offset
   workflow_dispatch:
 
 concurrency:
@@ -30,4 +28,4 @@ jobs:
           ANALYSIS_LOCAL_HOUR: "5"
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ANALYSIS_MODEL: ${{ secrets.ANALYSIS_MODEL }}
+          ANALYSIS_MODEL: claude-sonnet-5
