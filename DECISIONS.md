@@ -236,3 +236,39 @@ SPEC 3.2 targets Node 22, which the GitHub Actions workflows pin
 (`actions/setup-node` with `node-version: 22`). The current development machine
 runs Node 24; nothing used here is version-specific, and CI remains the source of
 truth for the runtime.
+
+## D-024 — Data retention: null old embeddings, keep the archive forever
+
+**Status:** accepted · **Phase:** operations
+
+The 1024-dim embedding on every `item` (~4 KB plus its HNSW index entry) is the
+only column that grows without bound, and it is read solely inside the 72h
+clustering window. `npm run retention` (daily workflow) nulls embeddings on items
+ingested more than `RETENTION_DAYS` ago (default 10 — a wide margin over 72h) and
+purges the `embedding_cache`, keying on `ingested_at` and guarding with a
+NOT EXISTS so an embedding an active cluster's centroid still needs is never
+removed. The `digest` archive and `counter_feedback` are never touched. No
+VACUUM FULL (exclusive lock); autovacuum reclaims freed space for reuse.
+
+## D-025 — Weekly logical backup as a workflow artifact
+
+**Status:** accepted · **Phase:** operations
+
+Neon free-tier point-in-time restore is limited and inactive projects can be
+removed, so `npm run backup` (weekly workflow) dumps the irreplaceable data —
+the `digest` archive and `counter_feedback` — to JSON uploaded as a 90-day
+artifact. The feed registry is re-seedable from `src/lib/registry.ts` and scores
+are re-derivable, so neither is included.
+
+## D-026 — Failure alerting on daily/infra jobs only
+
+**Status:** accepted · **Phase:** operations
+
+Each job ended with `process.exit(1)` (a red run nobody watches), so an
+`if: failure()` step now emails via the existing mail path. It is wired to the
+daily and infrastructure jobs (analyse, deliver, counter, retention, backup, and
+keepalive via dependency-free curl) where a single failure is a real,
+non-self-healing gap. The 30-minute ingest/cluster/enrich jobs are deliberately
+excluded: a transient failure self-heals next cycle, and alerting every 30 min
+would spam the rate-limited Resend sandbox sender; sustained ingestion loss still
+surfaces in the digest's operations line.

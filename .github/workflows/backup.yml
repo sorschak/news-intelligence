@@ -1,19 +1,23 @@
-name: analyse
+name: backup
 
-# SPEC.md 3.1: daily, pre-digest. Fires at both candidate UTC hours for 05:00
-# America/Toronto and the job exits unless the local hour matches (SPEC 10.2).
+# Operations hardening: weekly logical backup of the irreplaceable data (the
+# digest archive and reader feedback), uploaded as a workflow artifact retained
+# 90 days. The feed registry is re-seedable from code and is not included.
 
 on:
   schedule:
-    - cron: "0 9,10 * * *" # 05:00 America/Toronto, either DST offset
+    - cron: "0 9 * * 1" # Mondays ~05:00 America/Toronto
   workflow_dispatch:
 
 concurrency:
-  group: analyse
+  group: backup
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
-  analyse:
+  backup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,18 +26,21 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run analyse
+      - run: npm run backup
         env:
-          TZ: America/Toronto
-          ANALYSIS_LOCAL_HOUR: "5"
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ANALYSIS_MODEL: claude-sonnet-5
+          BACKUP_DIR: backup
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: backup/
+          retention-days: 90
       - name: Alert on failure
         if: failure()
         run: npm run alert
         env:
-          JOB_NAME: analyse
+          JOB_NAME: backup
           GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
           MAIL_PROVIDER: resend

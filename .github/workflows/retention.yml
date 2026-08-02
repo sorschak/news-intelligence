@@ -1,19 +1,24 @@
-name: analyse
+name: retention
 
-# SPEC.md 3.1: daily, pre-digest. Fires at both candidate UTC hours for 05:00
-# America/Toronto and the job exits unless the local hour matches (SPEC 10.2).
+# Operations hardening: null embeddings on items past the clustering window and
+# purge the embedding cache, so the Neon database does not grow without bound
+# (embeddings are ~4 KB each and dead weight after 72h). The archive (digest) is
+# never touched. Idempotent; timing is not sensitive, so a single daily cron.
 
 on:
   schedule:
-    - cron: "0 9,10 * * *" # 05:00 America/Toronto, either DST offset
+    - cron: "0 8 * * *" # ~04:00 America/Toronto (either DST offset)
   workflow_dispatch:
 
 concurrency:
-  group: analyse
+  group: retention
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
-  analyse:
+  retention:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,18 +27,15 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run analyse
+      - run: npm run retention
         env:
-          TZ: America/Toronto
-          ANALYSIS_LOCAL_HOUR: "5"
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ANALYSIS_MODEL: claude-sonnet-5
+          RETENTION_DAYS: "10"
       - name: Alert on failure
         if: failure()
         run: npm run alert
         env:
-          JOB_NAME: analyse
+          JOB_NAME: retention
           GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
           MAIL_PROVIDER: resend

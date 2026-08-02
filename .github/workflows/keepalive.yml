@@ -23,3 +23,17 @@ jobs:
           git config user.email "keepalive@users.noreply.github.com"
           git commit --allow-empty -m "chore: keepalive"
           git push
+      # Dependency-free alert (this job has no Node setup). A keepalive failure is
+      # serious: without it GitHub disables every schedule after 60 days.
+      - name: Alert on failure
+        if: failure()
+        run: |
+          curl -sf -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer $MAIL_API_KEY" \
+            -H "Content-Type: application/json" \
+            --data "$(printf '{"from":"%s","to":["%s"],"subject":"⚠️ News Intelligence: keepalive failed","html":"<p>The keepalive job failed — GitHub will disable the scheduled workflows after 60 days of inactivity. <a href=\"%s\">View run</a></p>"}' "$MAIL_FROM" "$DIGEST_RECIPIENT" "$RUN_URL")" || true
+        env:
+          MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
+          MAIL_FROM: onboarding@resend.dev
+          DIGEST_RECIPIENT: kurt@sorschak.com
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

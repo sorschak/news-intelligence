@@ -36,3 +36,13 @@ jobs:
           MAIL_PROVIDER: resend
           MAIL_FROM: onboarding@resend.dev
           DIGEST_RECIPIENT: kurt@sorschak.com
+      - name: Alert on failure
+        if: failure()
+        run: npm run alert
+        env:
+          JOB_NAME: counter
+          GITHUB_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
+          MAIL_PROVIDER: resend
+          MAIL_FROM: onboarding@resend.dev
+          DIGEST_RECIPIENT: kurt@sorschak.com
