@@ -59,7 +59,7 @@ const paper = (
   homepage,
 });
 
-// SPEC.md Section 11 — ~55 outlets.
+// SPEC.md Section 11 — ~65 outlets.
 export const OUTLETS: readonly OutletSeed[] = [
   wire("Reuters", "Global", "GB", "en", "https://www.reuters.com"),
   wire("Associated Press", "Global", "US", "en", "https://apnews.com"),
@@ -118,6 +118,22 @@ export const OUTLETS: readonly OutletSeed[] = [
   paper("Utility Dive", "US", "US", "en", "https://www.utilitydive.com", true),
   paper("Carbon Brief", "UK", "GB", "en", "https://www.carbonbrief.org", true),
   paper("pv magazine", "Global", "DE", "en", "https://www.pv-magazine.com", true),
+  // China — official state media (English editions): the originators of the
+  // official line, wanted for the industrial-policy focus. Marked tier 2 (not
+  // wire) so state framing gets no wire-level corroboration bonus; single-source
+  // state claims land in "thinly sourced". The independent watchers below are the
+  // cross-check.
+  paper("China Daily", "China", "CN", "en", "https://www.chinadaily.com.cn"),
+  paper("Global Times", "China", "CN", "en", "https://www.globaltimes.cn"),
+  paper("CGTN", "China", "CN", "en", "https://www.cgtn.com"),
+  paper("People's Daily", "China", "CN", "en", "https://en.people.cn"),
+  paper("Xinhua", "China", "CN", "en", "https://english.news.cn"),
+  // China — independent / translated watchers (English)
+  paper("The Wire China", "US", "US", "en", "https://www.thewirechina.com", true),
+  paper("ChinaFile", "US", "US", "en", "https://www.chinafile.com", true),
+  paper("China Digital Times", "US", "US", "en", "https://chinadigitaltimes.net"),
+  paper("What's on Weibo", "Netherlands", "NL", "en", "https://www.whatsonweibo.com"),
+  paper("Pekingnology", "China", "CN", "en", "https://www.pekingnology.com"),
 ];
 
 /** Homepage for a seeded outlet name (used by discovery), or null. */

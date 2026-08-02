@@ -233,6 +233,25 @@ export const CURATED_FEEDS: readonly CuratedFeed[] = [
   { outlet: "Carbon Brief", url: "https://www.carbonbrief.org/feed/", section: "main" },
   { outlet: "pv magazine", url: "https://www.pv-magazine.com/feed/", section: "main" },
 
+  // China — English-language coverage (all verified 2026-08-02). State media give
+  // the official line (industrial-policy focus); the independent/translated
+  // watchers below provide the cross-check that keeps single-source state claims
+  // in "thinly sourced". Caixin and Yicai Global expose no public RSS, and Sixth
+  // Tone dropped its feed — those are left to auto-discovery.
+  { outlet: "China Daily", url: "https://www.chinadaily.com.cn/rss/china_rss.xml", section: "china" },
+  { outlet: "China Daily", url: "https://www.chinadaily.com.cn/rss/world_rss.xml", section: "world" },
+  { outlet: "China Daily", url: "https://www.chinadaily.com.cn/rss/bizchina_rss.xml", section: "business" },
+  { outlet: "Global Times", url: "https://www.globaltimes.cn/rss/outbrain.xml", section: "main" },
+  { outlet: "CGTN", url: "https://www.cgtn.com/subscribe/rss/section/china.xml", section: "china" },
+  { outlet: "CGTN", url: "https://www.cgtn.com/subscribe/rss/section/world.xml", section: "world" },
+  { outlet: "People's Daily", url: "http://en.people.cn/rss/China.xml", section: "china" },
+  { outlet: "Xinhua", url: "https://english.news.cn/rss/worldrss.xml", section: "world" },
+  { outlet: "The Wire China", url: "https://www.thewirechina.com/feed/", section: "main" },
+  { outlet: "ChinaFile", url: "https://www.chinafile.com/rss.xml", section: "main" },
+  { outlet: "China Digital Times", url: "https://chinadigitaltimes.net/feed/", section: "main" },
+  { outlet: "What's on Weibo", url: "https://www.whatsonweibo.com/feed/", section: "main" },
+  { outlet: "Pekingnology", url: "https://www.pekingnology.com/feed", section: "main" },
+
 ];
 
 // Note: CBC uses the cbc.ca/webfeed/rss/rss-* endpoints above (the older
