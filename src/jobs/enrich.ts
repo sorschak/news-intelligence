@@ -17,11 +17,14 @@ import {
   corroborationByOutlets,
   corroborationByPublication,
 } from "../lib/corroboration.js";
+import { optionalEnv } from "../lib/env.js";
 import { gdeltVolume, topKeywords } from "../lib/gdelt.js";
 import { classify } from "../lib/originator.js";
 
 const WINDOW = "72 hours";
 const PRECEDENCE_SIMILARITY = 0.95;
+// GDELT (SPEC 7.4) is context-only and rate-limited; opt in with ENRICH_GDELT=1.
+const GDELT_ENABLED = optionalEnv("ENRICH_GDELT", "") === "1";
 
 type ClusterRow = { id: string; primary_ref: string | null; gdelt_volume: string | null };
 
@@ -137,9 +140,10 @@ async function enrichCluster(sql: Sql, cluster: ClusterRow): Promise<void> {
         })
       : corroborationByOutlets(parsed);
 
-  // GDELT context is fetched once per cluster (only when not already stored).
+  // GDELT context is fetched once per cluster (only when not already stored),
+  // and only when explicitly enabled (ENRICH_GDELT=1) — see GDELT_ENABLED.
   let gdelt = cluster.gdelt_volume === null ? null : Number(cluster.gdelt_volume);
-  if (cluster.gdelt_volume === null) {
+  if (GDELT_ENABLED && cluster.gdelt_volume === null) {
     gdelt = await gdeltVolume(topKeywords(items.map((i) => i.headline)));
   }
 

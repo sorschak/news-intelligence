@@ -206,6 +206,16 @@ together when Vercel is provisioned, to avoid introducing Next.js/React build
 config before it is exercised. The exit-criterion path (14 digests delivered +
 archived) does not depend on the UI.
 
+## D-022 — GDELT lookups in enrich are opt-in (ENRICH_GDELT=1)
+
+**Status:** accepted · **Phase:** 3
+
+The enrich job would otherwise fire one GDELT request per un-scored cluster
+(~1,378 sequential calls on a cold start) — slow and impolite to a public API.
+GDELT is FR-06 ("Should") and context-only (excluded from salience), so it is
+gated behind `ENRICH_GDELT=1`, defaulting off. Enable it in the Actions
+environment once cadence is steady and clusters are incremental.
+
 ## D-006 — Local development on Node 24
 
 **Status:** accepted · **Phase:** infrastructure
