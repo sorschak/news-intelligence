@@ -216,6 +216,18 @@ GDELT is FR-06 ("Should") and context-only (excluded from salience), so it is
 gated behind `ENRICH_GDELT=1`, defaulting off. Enable it in the Actions
 environment once cadence is steady and clusters are incremental.
 
+## D-023 — analyse: forced-run bypass, per-run cap, lenient JSON parse
+
+**Status:** accepted · **Phase:** 4
+
+Three operational refinements to the analysis job, from the first live run:
+(1) `FORCE_RUN=1` (or a GitHub `workflow_dispatch`) skips the local-hour guard,
+so manual runs work off-schedule; (2) `ANALYSE_MAX_CLUSTERS` caps clusters per
+run (most-corroborated first) to bound cost on a backlog; (3) `parseJsonBlock`
+now tolerates stray prose around model JSON by slicing to the outermost braces
+(2 of 40 claim extractions had failed on wrapper text — scores were unaffected,
+as they persist before claim extraction). None change scoring semantics.
+
 ## D-006 — Local development on Node 24
 
 **Status:** accepted · **Phase:** infrastructure

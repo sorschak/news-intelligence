@@ -89,13 +89,19 @@ async function analyseCluster(sql: Sql, cluster: ClusterRow): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  // Manual/forced runs (workflow_dispatch or FORCE_RUN=1) skip the daily-hour guard.
+  const forced =
+    optionalEnv("FORCE_RUN", "") === "1" ||
+    optionalEnv("GITHUB_EVENT_NAME", "") === "workflow_dispatch";
   const targetHour = Number(optionalEnv("ANALYSIS_LOCAL_HOUR", "5"));
   const tz = optionalEnv("TZ", "America/Toronto");
-  if (!shouldRunNow(targetHour, tz)) {
+  if (!forced && !shouldRunNow(targetHour, tz)) {
     console.log(`analyse: not ${targetHour}:00 ${tz}; exiting.`);
     return;
   }
 
+  // Optional per-run cap (ANALYSE_MAX_CLUSTERS); most-corroborated first.
+  const maxClusters = Number(optionalEnv("ANALYSE_MAX_CLUSTERS", "0"));
   const sql = getSql();
   const clusters = await sql<ClusterRow[]>`
     SELECT c.id, c.corroboration::text AS corroboration
@@ -108,7 +114,8 @@ async function main(): Promise<void> {
         SELECT 1 FROM cluster_score s
         WHERE s.cluster_id = c.id AND s.prompt_hash = ${SCORE_PROMPT_HASH}
       )
-    ORDER BY c.id ASC
+    ORDER BY c.corroboration DESC
+    ${maxClusters > 0 ? sql`LIMIT ${maxClusters}` : sql``}
   `;
 
   let scored = 0;

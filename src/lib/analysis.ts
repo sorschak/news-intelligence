@@ -91,8 +91,14 @@ function parseJsonBlock<T>(text: string): T {
   if (t.startsWith("```")) {
     t = t
       .replace(/^```[a-zA-Z]*\n?/, "")
-      .replace(/```$/, "")
+      .replace(/```\s*$/, "")
       .trim();
+  }
+  // Tolerate stray prose around the JSON by slicing to the outermost braces.
+  if (!t.startsWith("{") && !t.startsWith("[")) {
+    const start = t.search(/[{[]/);
+    const end = Math.max(t.lastIndexOf("}"), t.lastIndexOf("]"));
+    if (start >= 0 && end > start) t = t.slice(start, end + 1);
   }
   return JSON.parse(t) as T;
 }
