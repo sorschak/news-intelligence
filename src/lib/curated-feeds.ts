@@ -252,6 +252,58 @@ export const CURATED_FEEDS: readonly CuratedFeed[] = [
   { outlet: "What's on Weibo", url: "https://www.whatsonweibo.com/feed/", section: "main" },
   { outlet: "Pekingnology", url: "https://www.pekingnology.com/feed", section: "main" },
 
+  // Southeast Asia (English) — verified 2026-08-02. Jakarta Post, The Star (MY),
+  // and Tempo expose no working RSS and are left to discovery.
+  { outlet: "Channel NewsAsia", url: "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml", section: "main" },
+  { outlet: "Bangkok Post", url: "https://www.bangkokpost.com/rss/data/topstories.xml", section: "topstories" },
+  { outlet: "New Straits Times", url: "https://www.nst.com.my/feed", section: "main" },
+  { outlet: "Rappler", url: "https://www.rappler.com/feed/", section: "main" },
+  { outlet: "Philippine Daily Inquirer", url: "https://www.inquirer.net/feed/", section: "main" },
+  { outlet: "VnExpress International", url: "https://e.vnexpress.net/rss/news.rss", section: "news" },
+  { outlet: "VnExpress International", url: "https://e.vnexpress.net/rss/business.rss", section: "business" },
+  { outlet: "The Diplomat", url: "https://thediplomat.com/feed/", section: "main" },
+
+  // South America — verified 2026-08-02. Estadão, Brazilian Report, Infobae, and
+  // El Espectador expose no working RSS and are left to discovery.
+  { outlet: "G1 Globo", url: "https://g1.globo.com/rss/g1/", section: "main" },
+  { outlet: "Clarín", url: "https://www.clarin.com/rss/lo-ultimo/", section: "ultimo" },
+  { outlet: "La Nación", url: "https://www.lanacion.com.ar/arc/outboundfeeds/rss/?outputType=xml", section: "main" },
+  { outlet: "Buenos Aires Herald", url: "https://buenosairesherald.com/feed", section: "main" },
+  { outlet: "Buenos Aires Times", url: "https://www.batimes.com.ar/feed", section: "main" },
+  { outlet: "El Tiempo", url: "https://www.eltiempo.com/rss/colombia.xml", section: "colombia" },
+  { outlet: "La Tercera", url: "https://www.latercera.com/arc/outboundfeeds/rss/?outputType=xml", section: "main" },
+  { outlet: "El Comercio Perú", url: "https://elcomercio.pe/arc/outboundfeeds/rss/?outputType=xml", section: "main" },
+  { outlet: "MercoPress", url: "https://en.mercopress.com/rss/", section: "main" },
+
+  // France — broader spectrum, verified 2026-08-02. Les Échos, La Tribune, and
+  // Le Point expose no working RSS (403/404) and are left to discovery.
+  { outlet: "Le Figaro", url: "https://www.lefigaro.fr/rss/figaro_actualites.xml", section: "actualites" },
+  { outlet: "Le Figaro", url: "https://www.lefigaro.fr/rss/figaro_economie.xml", section: "economie" },
+  { outlet: "Le Figaro", url: "https://www.lefigaro.fr/rss/figaro_international.xml", section: "international" },
+  { outlet: "Libération", url: "https://www.liberation.fr/arc/outboundfeeds/rss/?outputType=xml", section: "main" },
+  { outlet: "France 24", url: "https://www.france24.com/fr/rss", section: "fr" },
+  { outlet: "France 24", url: "https://www.france24.com/en/rss", section: "en" },
+  { outlet: "RFI", url: "https://www.rfi.fr/fr/rss", section: "fr" },
+  { outlet: "L'Express", url: "https://www.lexpress.fr/rss/alaune.xml", section: "alaune" },
+  { outlet: "Ouest-France", url: "https://www.ouest-france.fr/rss/une", section: "une" },
+  { outlet: "Mediapart", url: "https://www.mediapart.fr/articles/feed", section: "main" },
+
+  // Germany — broader spectrum, verified 2026-08-02. Der Spiegel's international
+  // feed is English (per-item language is detected at ingestion).
+  { outlet: "Der Spiegel", url: "https://www.spiegel.de/schlagzeilen/tops/index.rss", section: "schlagzeilen" },
+  { outlet: "Der Spiegel", url: "https://www.spiegel.de/wirtschaft/index.rss", section: "wirtschaft" },
+  { outlet: "Der Spiegel", url: "https://www.spiegel.de/international/index.rss", section: "international" },
+  { outlet: "Die Zeit", url: "https://newsfeed.zeit.de/index", section: "index" },
+  { outlet: "Die Zeit", url: "https://newsfeed.zeit.de/wirtschaft/index", section: "wirtschaft" },
+  { outlet: "Die Welt", url: "https://www.welt.de/feeds/latest.rss", section: "latest" },
+  { outlet: "Die Welt", url: "https://www.welt.de/feeds/section/wirtschaft.rss", section: "wirtschaft" },
+  { outlet: "Tagesschau", url: "https://www.tagesschau.de/index~rss2.xml", section: "index" },
+  { outlet: "Tagesschau", url: "https://www.tagesschau.de/wirtschaft/index~rss2.xml", section: "wirtschaft" },
+  { outlet: "Deutsche Welle", url: "https://rss.dw.com/rdf/rss-en-all", section: "en" },
+  { outlet: "Deutsche Welle", url: "https://rss.dw.com/xml/rss-de-all", section: "de" },
+  { outlet: "taz", url: "https://taz.de/rss.xml", section: "main" },
+  { outlet: "Frankfurter Rundschau", url: "https://www.fr.de/rssfeed.rdf", section: "main" },
+
 ];
 
 // Note: CBC uses the cbc.ca/webfeed/rss/rss-* endpoints above (the older

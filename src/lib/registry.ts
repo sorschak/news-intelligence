@@ -59,7 +59,7 @@ const paper = (
   homepage,
 });
 
-// SPEC.md Section 11 — ~65 outlets.
+// SPEC.md Section 11 — ~95 outlets.
 export const OUTLETS: readonly OutletSeed[] = [
   wire("Reuters", "Global", "GB", "en", "https://www.reuters.com"),
   wire("Associated Press", "Global", "US", "en", "https://apnews.com"),
@@ -134,6 +134,40 @@ export const OUTLETS: readonly OutletSeed[] = [
   paper("China Digital Times", "US", "US", "en", "https://chinadigitaltimes.net"),
   paper("What's on Weibo", "Netherlands", "NL", "en", "https://www.whatsonweibo.com"),
   paper("Pekingnology", "China", "CN", "en", "https://www.pekingnology.com"),
+  // Southeast Asia (English)
+  paper("Channel NewsAsia", "Singapore", "SG", "en", "https://www.channelnewsasia.com"),
+  paper("Bangkok Post", "Thailand", "TH", "en", "https://www.bangkokpost.com"),
+  paper("New Straits Times", "Malaysia", "MY", "en", "https://www.nst.com.my"),
+  paper("Rappler", "Philippines", "PH", "en", "https://www.rappler.com"),
+  paper("Philippine Daily Inquirer", "Philippines", "PH", "en", "https://www.inquirer.net"),
+  paper("VnExpress International", "Vietnam", "VN", "en", "https://e.vnexpress.net"),
+  paper("The Diplomat", "Asia-Pacific", "US", "en", "https://thediplomat.com", true),
+  // South America
+  paper("G1 Globo", "Brazil", "BR", "pt", "https://g1.globo.com"),
+  paper("Clarín", "Argentina", "AR", "es", "https://www.clarin.com"),
+  paper("La Nación", "Argentina", "AR", "es", "https://www.lanacion.com.ar"),
+  paper("Buenos Aires Herald", "Argentina", "AR", "en", "https://buenosairesherald.com"),
+  paper("Buenos Aires Times", "Argentina", "AR", "en", "https://www.batimes.com.ar"),
+  paper("El Tiempo", "Colombia", "CO", "es", "https://www.eltiempo.com"),
+  paper("La Tercera", "Chile", "CL", "es", "https://www.latercera.com"),
+  paper("El Comercio Perú", "Peru", "PE", "es", "https://elcomercio.pe"),
+  paper("MercoPress", "South America", "UY", "en", "https://en.mercopress.com"),
+  // France — broader spectrum (Figaro right, Libération/Mediapart left, public broadcasters)
+  paper("Le Figaro", "France", "FR", "fr", "https://www.lefigaro.fr"),
+  paper("Libération", "France", "FR", "fr", "https://www.liberation.fr"),
+  paper("France 24", "France", "FR", "fr", "https://www.france24.com"),
+  paper("RFI", "France", "FR", "fr", "https://www.rfi.fr"),
+  paper("L'Express", "France", "FR", "fr", "https://www.lexpress.fr"),
+  paper("Ouest-France", "France", "FR", "fr", "https://www.ouest-france.fr"),
+  paper("Mediapart", "France", "FR", "fr", "https://www.mediapart.fr"),
+  // Germany — broader spectrum (Spiegel, Zeit, Welt, public broadcasters, taz)
+  paper("Der Spiegel", "Germany", "DE", "de", "https://www.spiegel.de"),
+  paper("Die Zeit", "Germany", "DE", "de", "https://www.zeit.de"),
+  paper("Die Welt", "Germany", "DE", "de", "https://www.welt.de"),
+  paper("Tagesschau", "Germany", "DE", "de", "https://www.tagesschau.de"),
+  paper("Deutsche Welle", "Germany", "DE", "de", "https://www.dw.com"),
+  paper("taz", "Germany", "DE", "de", "https://taz.de"),
+  paper("Frankfurter Rundschau", "Germany", "DE", "de", "https://www.fr.de"),
 ];
 
 /** Homepage for a seeded outlet name (used by discovery), or null. */
