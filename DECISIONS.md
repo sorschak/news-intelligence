@@ -272,3 +272,21 @@ non-self-healing gap. The 30-minute ingest/cluster/enrich jobs are deliberately
 excluded: a transient failure self-heals next cycle, and alerting every 30 min
 would spam the rate-limited Resend sandbox sender; sustained ingestion loss still
 surfaces in the digest's operations line.
+
+## D-027 — Scoring distinguishes monetary-policy actions from price moves
+
+**Status:** accepted · **Phase:** 4 (owner directive)
+
+The v1.2 rubric scored "a market move" as structural ≤1 and "single-day market
+moves" as ephemerality 5. A coordinated US–Japan FX intervention (cluster 704:
+83 items, 15.5 originators, corroboration 0.80) therefore scored salience 0.085
+and never surfaced — despite monetary policy already being a stated domain
+interest. On the owner's direction (more financial coverage), `src/prompts/score.txt`
+now separates a routine price MOVE (still ephemeral, still demoted) from a
+monetary-policy or financial-structural ACTION — central-bank/FX intervention,
+rate-regime change, default, bailout, capital controls — which alters a market
+structure and is not ephemeral. `domain_relevance` also names central-bank
+action, currencies, and major corporate finance explicitly. Re-scoring the yen
+cluster: structural 2→4, ephemerality 5→2, domain 3→5, salience 0.085→0.484.
+Editing score.txt changes SCORE_PROMPT_HASH, so analyse re-scores the corpus
+under the new hash over successive capped runs; routine price moves are unaffected.
