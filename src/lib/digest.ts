@@ -185,6 +185,23 @@ export function digestClusterIds(sections: DigestSections): string[] {
   return [...seen];
 }
 
+/**
+ * Plain-language key for the three per-item numbers, shown at the foot of the
+ * digest. `salienceLabel` differs between the daily edition ("salience") and the
+ * counter edition ("undomained salience").
+ */
+function readingGuideHtml(salienceLabel = "salience", showOriginators = true): string {
+  return [
+    '<section class="guide"><h2>How to read this</h2>',
+    `<p><strong>${salienceLabel}</strong> (0–1): how much the story matters — the list is ranked by this. It rewards lasting change (a law, a market, a treaty) over what is merely trending; there is no points-for-recency.<br>`,
+    "<strong>corroboration</strong> (0–1): how widely and independently it is confirmed — more separate newsrooms, wires, countries and languages push it higher.",
+    showOriginators
+      ? "<br><strong>originators</strong>: how many newsrooms reported it first-hand. Outlets that just reprinted a wire or another paper don't count, so a story everyone copied from one source still reads low."
+      : "",
+    "</p></section>",
+  ].join("");
+}
+
 /** Render the digest to a static HTML string persisted to digest.html (SPEC 3.2). */
 export function renderDigestHtml(input: DigestInput): string {
   const { sections } = input;
@@ -196,7 +213,8 @@ export function renderDigestHtml(input: DigestInput): string {
     "h1{font-size:1.4rem}h2{font-size:1.1rem;border-bottom:1px solid #ccc;padding-bottom:.2rem}",
     ".excerpt{color:#333;margin:.2rem 0}.meta{color:#777;font-size:.8rem}",
     ".rationale{color:#222;margin:.2rem 0}.divergence{color:#333;margin:.2rem 0;font-size:.9rem}.dtime{color:#999}",
-    "footer{color:#777;font-size:.8rem;border-top:1px solid #ccc;margin-top:2rem;padding-top:.5rem}</style>",
+    ".guide{color:#555;font-size:.85rem;margin-top:2rem}.guide h2{font-size:1rem}",
+    "footer{color:#777;font-size:.8rem;border-top:1px solid #ccc;margin-top:1rem;padding-top:.5rem}</style>",
     "</head><body>",
     `<h1>News Intelligence — ${esc(input.editionDate)}</h1>`,
     `<section><h2>Overview</h2><p>${esc(input.overview)}</p></section>`,
@@ -206,6 +224,7 @@ export function renderDigestHtml(input: DigestInput): string {
     renderSection("Divergence watch", sections.divergence),
     renderSection("Thinly sourced", sections.thinlySourced),
     renderSection("Held and released", sections.heldReleased),
+    readingGuideHtml(),
     `<footer>Operations: ${esc(input.operations)}</footer>`,
     "</body></html>",
   ].join("");
@@ -256,6 +275,7 @@ export function renderCounterHtml(input: CounterDigestInput): string {
     "<style>body{font:16px/1.5 Georgia,serif;max-width:44rem;margin:2rem auto;padding:0 1rem}",
     "h1{font-size:1.4rem}h2{font-size:1.1rem;border-bottom:1px solid #ccc;padding-bottom:.2rem}",
     ".excerpt{color:#333;margin:.2rem 0}.meta{color:#777;font-size:.8rem}.feedback{font-size:.85rem;margin:.2rem 0}",
+    ".guide{color:#555;font-size:.85rem;margin-top:2rem}.guide h2{font-size:1rem}",
     "footer{color:#777;font-size:.8rem;border-top:1px solid #ccc;margin-top:2rem;padding-top:.5rem}</style>",
     "</head><body>",
     `<h1>Counter-bias edition — ${esc(input.editionDate)}</h1>`,
@@ -270,6 +290,7 @@ export function renderCounterHtml(input: CounterDigestInput): string {
       ? `<section><h2>Contribution</h2><ul>${input.contribution.map(renderItem).join("")}</ul></section>`
       : "",
     `<section><h2>Coverage gaps</h2><p>${esc(gaps)}</p></section>`,
+    readingGuideHtml("undomained salience", false),
     "</body></html>",
   ].join("");
 }
