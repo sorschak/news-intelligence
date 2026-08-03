@@ -1,11 +1,14 @@
 name: analyse
 
-# SPEC.md 3.1: daily, pre-digest. Fires at both candidate UTC hours for 05:00
-# America/Toronto and the job exits unless the local hour matches (SPEC 10.2).
+# SPEC.md 3.1: daily, pre-digest, ~05:00 America/Toronto. GitHub delays or drops
+# top-of-the-hour scheduled runs, so this fires at :23 across several UTC hours
+# (covering both DST offsets and typical delays) and the job accepts any run in
+# the 05:00–10:00 local window (src/jobs/analyse.ts). The NOT EXISTS scoring
+# clause makes repeat slots cheap, so at-most-once-effective per morning.
 
 on:
   schedule:
-    - cron: "0 9,10 * * *" # 05:00 America/Toronto, either DST offset
+    - cron: "23 9,10,11,12 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -26,6 +29,8 @@ jobs:
         env:
           TZ: America/Toronto
           ANALYSIS_LOCAL_HOUR: "5"
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          ANALYSE_MAX_CLUSTERS: "80" # cost/time cap; NOT EXISTS clears the backlog over successive runs
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ANALYSIS_MODEL: claude-sonnet-5

@@ -16,9 +16,10 @@ import { extractClaims, SCORE_PROMPT_HASH, scoreCluster } from "../lib/analysis.
 import { closeSql, getSql, type Sql } from "../lib/db.js";
 import { optionalEnv } from "../lib/env.js";
 import { scoreBoth, type Score } from "../lib/scoring.js";
-import { shouldRunNow } from "../lib/time.js";
+import { withinHourWindow } from "../lib/time.js";
 
 const WINDOW = "72 hours";
+const RUN_WINDOW_HOURS = 5; // accept a scheduled run anytime 05:00–10:00 local
 
 type ClusterRow = { id: string; corroboration: string };
 type ItemRow = {
@@ -95,8 +96,14 @@ async function main(): Promise<void> {
     optionalEnv("GITHUB_EVENT_NAME", "") === "workflow_dispatch";
   const targetHour = Number(optionalEnv("ANALYSIS_LOCAL_HOUR", "5"));
   const tz = optionalEnv("TZ", "America/Toronto");
-  if (!forced && !shouldRunNow(targetHour, tz)) {
-    console.log(`analyse: not ${targetHour}:00 ${tz}; exiting.`);
+  // Window rather than a strict hour: GitHub delays/drops top-of-hour scheduled
+  // runs, and an equality guard would make a delayed run a silent no-op. Any run
+  // in the window works; the NOT EXISTS clause below keeps repeat slots cheap
+  // (only newly-eligible clusters get scored).
+  if (!forced && !withinHourWindow(targetHour, RUN_WINDOW_HOURS, tz)) {
+    console.log(
+      `analyse: outside the ${targetHour}:00–${targetHour + RUN_WINDOW_HOURS}:00 ${tz} window; exiting.`,
+    );
     return;
   }
 

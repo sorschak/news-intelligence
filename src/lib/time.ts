@@ -23,6 +23,25 @@ export function shouldRunNow(
   return localHour(tz, now) === targetLocalHour;
 }
 
+/**
+ * True when the current local hour in `tz` is within [target, target+windowHours).
+ *
+ * GitHub Actions frequently delays or drops scheduled runs pinned to the top of
+ * the hour, and a strict equality guard (`shouldRunNow`) would then make a
+ * delayed run exit as a silent no-op. A window plus a once-per-day idempotency
+ * check in the caller lets any run inside the morning window do the work exactly
+ * once, so a delayed run still delivers.
+ */
+export function withinHourWindow(
+  targetLocalHour: number,
+  windowHours: number,
+  tz: string = DEFAULT_TZ,
+  now: Date = new Date(),
+): boolean {
+  const h = localHour(tz, now);
+  return h >= targetLocalHour && h < targetLocalHour + windowHours;
+}
+
 /** The hour (0–23) in the given timezone for `now`. */
 export function localHour(tz: string = DEFAULT_TZ, now: Date = new Date()): number {
   const formatted = new Intl.DateTimeFormat("en-CA", {

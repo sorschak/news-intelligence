@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { localHour, shouldRunNow } from "../src/lib/time.js";
+import { localHour, shouldRunNow, withinHourWindow } from "../src/lib/time.js";
 
 const TZ = "America/Toronto";
 
@@ -25,5 +25,25 @@ describe("localHour / shouldRunNow", () => {
   it("reports midnight as 0, not 24", () => {
     const midnight = new Date("2026-01-15T05:00:00Z"); // 00:00 Toronto, winter
     expect(localHour(TZ, midnight)).toBe(0);
+  });
+});
+
+describe("withinHourWindow", () => {
+  const summer = (h: number) => new Date(Date.UTC(2026, 6, 15, h, 0, 0)); // EDT = UTC-4
+
+  it("accepts a run at the target hour", () => {
+    expect(withinHourWindow(5, 5, TZ, summer(9))).toBe(true); // 05:00 ET
+  });
+
+  it("accepts a delayed run still inside the window", () => {
+    expect(withinHourWindow(5, 5, TZ, summer(13))).toBe(true); // 09:00 ET, within [5,10)
+  });
+
+  it("rejects a run before the window opens", () => {
+    expect(withinHourWindow(5, 5, TZ, summer(8))).toBe(false); // 04:00 ET
+  });
+
+  it("rejects a run past the window (upper bound exclusive)", () => {
+    expect(withinHourWindow(5, 5, TZ, summer(14))).toBe(false); // 10:00 ET
   });
 });

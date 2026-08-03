@@ -24,9 +24,10 @@ import { divergence, type Divergence, type NumericClaim } from "../lib/divergenc
 import { optionalEnv } from "../lib/env.js";
 import { sendDigest } from "../lib/mail.js";
 import { scoreBoth, type Score } from "../lib/scoring.js";
-import { shouldRunNow } from "../lib/time.js";
+import { withinHourWindow } from "../lib/time.js";
 
 const WINDOW = "72 hours";
+const RUN_WINDOW_HOURS = 5; // accept a scheduled run anytime 06:00–11:00 local
 
 type CandidateRow = {
   id: string;
@@ -158,14 +159,22 @@ async function main(): Promise<void> {
   // Preview mode (DELIVER_PREVIEW=1): render the digest HTML to a file only — no
   // hold/rescore mutations, no mail, no archive write. Forced runs skip the guard.
   const preview = optionalEnv("DELIVER_PREVIEW", "") === "1";
+  const event = optionalEnv("GITHUB_EVENT_NAME", "");
   const forced =
     preview ||
     optionalEnv("FORCE_RUN", "") === "1" ||
-    optionalEnv("GITHUB_EVENT_NAME", "") === "workflow_dispatch";
+    event === "workflow_dispatch" ||
+    // Chained right after a successful analyse — deliver immediately, whatever
+    // the clock says; the existence check below still makes it idempotent.
+    event === "workflow_run";
   const tz = optionalEnv("TZ", "America/Toronto");
   const targetHour = Number(optionalEnv("TARGET_LOCAL_HOUR", "6"));
-  if (!forced && !shouldRunNow(targetHour, tz)) {
-    console.log(`deliver: not ${targetHour}:00 ${tz}; exiting.`);
+  // Window rather than a strict hour (GitHub delays top-of-hour runs); the
+  // UNIQUE(edition_date, kind) existence check keeps repeat runs a no-op.
+  if (!forced && !withinHourWindow(targetHour, RUN_WINDOW_HOURS, tz)) {
+    console.log(
+      `deliver: outside the ${targetHour}:00–${targetHour + RUN_WINDOW_HOURS}:00 ${tz} window; exiting.`,
+    );
     return;
   }
 

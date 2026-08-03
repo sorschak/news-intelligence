@@ -6,7 +6,7 @@ name: backup
 
 on:
   schedule:
-    - cron: "0 9 * * 1" # Mondays ~05:00 America/Toronto
+    - cron: "52 9 * * 1" # Mondays ~05:00 America/Toronto (off-hour)
   workflow_dispatch:
 
 concurrency:

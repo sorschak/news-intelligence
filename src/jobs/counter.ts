@@ -22,7 +22,7 @@ import {
 import { optionalEnv } from "../lib/env.js";
 import { signToken } from "../lib/feedback.js";
 import { sendDigest } from "../lib/mail.js";
-import { shouldRunNow } from "../lib/time.js";
+import { withinHourWindow } from "../lib/time.js";
 
 const WINDOW = "14 days";
 const COUNTER_SIZE_MAX = 10;
@@ -89,7 +89,7 @@ async function main(): Promise<void> {
   // Fortnightly cadence: the cron fires every Sunday, so gate to even-indexed
   // weeks (whole weeks since the Unix epoch) — one Sunday in two.
   const isFortnightWeek = Math.floor(Date.now() / (7 * 24 * 3600 * 1000)) % 2 === 0;
-  if (!forced && (!shouldRunNow(targetHour, tz) || !isSunday || !isFortnightWeek)) {
+  if (!forced && (!withinHourWindow(targetHour, 4, tz) || !isSunday || !isFortnightWeek)) {
     console.log(`counter: not the scheduled fortnightly Sunday ${targetHour}:00 ${tz}; exiting.`);
     return;
   }

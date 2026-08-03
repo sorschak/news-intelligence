@@ -7,7 +7,7 @@ name: retention
 
 on:
   schedule:
-    - cron: "0 8 * * *" # ~04:00 America/Toronto (either DST offset)
+    - cron: "37 8,9 * * *" # ~04:00 America/Toronto (off-hour, redundant slots; idempotent)
   workflow_dispatch:
 
 concurrency:

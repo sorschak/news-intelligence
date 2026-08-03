@@ -1,11 +1,18 @@
 name: deliver
 
-# SPEC.md 3.1 / 10.2: daily 06:00 America/Toronto. Fires at both candidate UTC
-# hours and the job exits unless the local hour matches.
+# SPEC.md 3.1 / 10.2: daily ~06:00 America/Toronto. Primary trigger is the
+# analyse workflow completing (deliver runs immediately after a successful
+# analysis, whatever the clock says). A scheduled backstop at :43 across several
+# UTC hours covers the case where the chain trigger is dropped; the job accepts
+# any run in the 06:00–11:00 local window and the digest's UNIQUE(edition_date,
+# kind) makes repeat runs a no-op.
 
 on:
+  workflow_run:
+    workflows: ["analyse"]
+    types: [completed]
   schedule:
-    - cron: "0 10,11 * * *" # 06:00 America/Toronto, either DST offset
+    - cron: "43 10,11,12,13 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -14,6 +21,8 @@ concurrency:
 
 jobs:
   deliver:
+    # On a workflow_run trigger, only proceed if analyse actually succeeded.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,6 +35,7 @@ jobs:
         env:
           TZ: America/Toronto
           TARGET_LOCAL_HOUR: "6"
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
