@@ -143,9 +143,10 @@ export function renderItem(c: ScoredCluster): string {
   ].join("");
 }
 
-function renderSection(title: string, items: ScoredCluster[]): string {
+function renderSection(title: string, items: ScoredCluster[], description = ""): string {
   if (items.length === 0) return "";
-  return `<section><h2>${esc(title)}</h2><ul>${items.map(renderItem).join("")}</ul></section>`;
+  const desc = description ? `<p class="desc">${esc(description)}</p>` : "";
+  return `<section><h2>${esc(title)}</h2>${desc}<ul>${items.map(renderItem).join("")}</ul></section>`;
 }
 
 export type DigestSections = {
@@ -213,17 +214,42 @@ export function renderDigestHtml(input: DigestInput): string {
     "h1{font-size:1.4rem}h2{font-size:1.1rem;border-bottom:1px solid #ccc;padding-bottom:.2rem}",
     ".excerpt{color:#333;margin:.2rem 0}.meta{color:#777;font-size:.8rem}",
     ".rationale{color:#222;margin:.2rem 0}.divergence{color:#333;margin:.2rem 0;font-size:.9rem}.dtime{color:#999}",
+    ".desc{color:#777;font-size:.85rem;font-style:italic;margin:.1rem 0 .5rem}",
     ".guide{color:#555;font-size:.85rem;margin-top:2rem}.guide h2{font-size:1rem}",
     "footer{color:#777;font-size:.8rem;border-top:1px solid #ccc;margin-top:1rem;padding-top:.5rem}</style>",
     "</head><body>",
     `<h1>News Intelligence — ${esc(input.editionDate)}</h1>`,
     `<section><h2>Overview</h2><p>${esc(input.overview)}</p></section>`,
-    renderSection("Structural", sections.structural),
-    renderSection("Corroborated events", sections.corroborated),
-    renderSection("Contribution", sections.contribution),
-    renderSection("Divergence watch", sections.divergence),
-    renderSection("Thinly sourced", sections.thinlySourced),
-    renderSection("Held and released", sections.heldReleased),
+    renderSection(
+      "Structural",
+      sections.structural,
+      "Stories that change a law, market, or institution.",
+    ),
+    renderSection(
+      "Corroborated events",
+      sections.corroborated,
+      "Independently confirmed by many separate sources.",
+    ),
+    renderSection(
+      "Contribution",
+      sections.contribution,
+      "Adds genuinely new knowledge, not just repetition.",
+    ),
+    renderSection(
+      "Divergence watch",
+      sections.divergence,
+      "A key figure that disagrees across sources over time — watch how it moved.",
+    ),
+    renderSection(
+      "Thinly sourced",
+      sections.thinlySourced,
+      "Only one or two sources — important if true, but not yet confirmed.",
+    ),
+    renderSection(
+      "Held and released",
+      sections.heldReleased,
+      "Held back to avoid overreacting to a spike, released once it held up.",
+    ),
     readingGuideHtml(),
     `<footer>Operations: ${esc(input.operations)}</footer>`,
     "</body></html>",
