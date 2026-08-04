@@ -1,14 +1,20 @@
 name: analyse
 
-# SPEC.md 3.1: daily, pre-digest, ~05:00 America/Toronto. GitHub reliably runs
-# FREQUENT schedules (like ingest/cluster) but drops sparse once-a-day ones, so
-# this fires every 20 min through the morning; the job accepts any run in the
-# 05:00–10:00 local window (src/jobs/analyse.ts) and the NOT EXISTS scoring
-# clause makes repeat runs cheap — at-most-once-effective per morning.
+# SPEC.md 3.1: daily, pre-digest, ~05:00 America/Toronto. This repo's SCHEDULED
+# runs are heavily throttled by GitHub (most cron slots are dropped — even
+# cluster, at every-30-min, only lands ~8x/day), which starved analyse's few
+# daily slots to zero. So the PRIMARY trigger is cluster completing (a
+# workflow_run event bypasses the schedule throttle); cluster fires several times
+# through the morning, and the 05:00–10:00 local window + once-per-day guards in
+# src/jobs/analyse.ts make analyse do its scoring pass exactly once. The cron is
+# kept only as a best-effort backstop.
 
 on:
+  workflow_run:
+    workflows: ["cluster"]
+    types: [completed]
   schedule:
-    - cron: "5,25,45 9-13 * * *" # every 20 min, 09:00–13:45 UTC (covers ~05:00 ET both DST offsets)
+    - cron: "5,25,45 9-13 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -17,6 +23,8 @@ concurrency:
 
 jobs:
   analyse:
+    # When chained off cluster, only proceed if cluster actually succeeded.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

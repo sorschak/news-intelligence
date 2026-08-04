@@ -161,16 +161,12 @@ async function main(): Promise<void> {
   const preview = optionalEnv("DELIVER_PREVIEW", "") === "1";
   const event = optionalEnv("GITHUB_EVENT_NAME", "");
   const forced =
-    preview ||
-    optionalEnv("FORCE_RUN", "") === "1" ||
-    event === "workflow_dispatch" ||
-    // Chained right after a successful analyse — deliver immediately, whatever
-    // the clock says; the existence check below still makes it idempotent.
-    event === "workflow_run";
+    preview || optionalEnv("FORCE_RUN", "") === "1" || event === "workflow_dispatch";
   const tz = optionalEnv("TZ", "America/Toronto");
   const targetHour = Number(optionalEnv("TARGET_LOCAL_HOUR", "6"));
-  // Window rather than a strict hour (GitHub delays top-of-hour runs); the
-  // UNIQUE(edition_date, kind) existence check keeps repeat runs a no-op.
+  // Window rather than a strict hour (GitHub delays/drops scheduled runs). deliver
+  // is triggered off cluster/analyse completion (reliable) as well as by cron;
+  // any trigger in the window works and the checks below enforce order + idempotency.
   if (!forced && !withinHourWindow(targetHour, RUN_WINDOW_HOURS, tz)) {
     console.log(
       `deliver: outside the ${targetHour}:00–${targetHour + RUN_WINDOW_HOURS}:00 ${tz} window; exiting.`,
@@ -187,6 +183,18 @@ async function main(): Promise<void> {
     `;
     if (existing.length > 0) {
       console.log(`deliver: digest for ${editionDate} already exists; nothing to do.`);
+      await closeSql();
+      return;
+    }
+    // Order guard: deliver must run AFTER today's analysis, so the digest is built
+    // on fresh scores rather than yesterday's. A cluster completion may trigger
+    // deliver before analyse has finished; if so, wait for a later trigger.
+    const [scoredToday] = await sql<{ n: number }[]>`
+      SELECT count(*)::int AS n FROM cluster_score
+      WHERE scored_at >= (date_trunc('day', now() AT TIME ZONE ${tz}) AT TIME ZONE ${tz})
+    `;
+    if ((scoredToday?.n ?? 0) < 30) {
+      console.log(`deliver: analysis has not run today yet (${scoredToday?.n} scored); waiting.`);
       await closeSql();
       return;
     }
