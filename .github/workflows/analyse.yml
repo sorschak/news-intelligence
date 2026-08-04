@@ -1,14 +1,14 @@
 name: analyse
 
-# SPEC.md 3.1: daily, pre-digest, ~05:00 America/Toronto. GitHub delays or drops
-# top-of-the-hour scheduled runs, so this fires at :23 across several UTC hours
-# (covering both DST offsets and typical delays) and the job accepts any run in
-# the 05:00–10:00 local window (src/jobs/analyse.ts). The NOT EXISTS scoring
-# clause makes repeat slots cheap, so at-most-once-effective per morning.
+# SPEC.md 3.1: daily, pre-digest, ~05:00 America/Toronto. GitHub reliably runs
+# FREQUENT schedules (like ingest/cluster) but drops sparse once-a-day ones, so
+# this fires every 20 min through the morning; the job accepts any run in the
+# 05:00–10:00 local window (src/jobs/analyse.ts) and the NOT EXISTS scoring
+# clause makes repeat runs cheap — at-most-once-effective per morning.
 
 on:
   schedule:
-    - cron: "23 9,10,11,12 * * *"
+    - cron: "5,25,45 9-13 * * *" # every 20 min, 09:00–13:45 UTC (covers ~05:00 ET both DST offsets)
   workflow_dispatch:
 
 concurrency:

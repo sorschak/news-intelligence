@@ -1,18 +1,18 @@
 name: deliver
 
-# SPEC.md 3.1 / 10.2: daily ~06:00 America/Toronto. Primary trigger is the
-# analyse workflow completing (deliver runs immediately after a successful
-# analysis, whatever the clock says). A scheduled backstop at :43 across several
-# UTC hours covers the case where the chain trigger is dropped; the job accepts
-# any run in the 06:00–11:00 local window and the digest's UNIQUE(edition_date,
-# kind) makes repeat runs a no-op.
+# SPEC.md 3.1 / 10.2: daily ~06:00 America/Toronto. Primary trigger is the analyse
+# workflow completing (deliver runs immediately after a successful analysis). A
+# FREQUENT scheduled backstop (every 30 min through the morning) covers dropped
+# chain triggers — GitHub drops sparse schedules but honours frequent ones. The
+# job accepts any run in the 06:00–11:00 local window and the digest's
+# UNIQUE(edition_date, kind) makes every repeat run a no-op.
 
 on:
   workflow_run:
     workflows: ["analyse"]
     types: [completed]
   schedule:
-    - cron: "43 10,11,12,13 * * *"
+    - cron: "15,45 10-14 * * *" # every 30 min, 10:00–14:45 UTC (covers ~06:00 ET both DST offsets)
   workflow_dispatch:
 
 concurrency:
