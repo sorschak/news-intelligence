@@ -30,7 +30,7 @@ jobs:
           TZ: America/Toronto
           ANALYSIS_LOCAL_HOUR: "5"
           GITHUB_EVENT_NAME: ${{ github.event_name }}
-          ANALYSE_MAX_CLUSTERS: "80" # cost/time cap; NOT EXISTS clears the backlog over successive runs
+          ANALYSE_MAX_CLUSTERS: "300" # daily scoring budget (once-per-day guard bounds cost); deeper coverage for regional stories
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ANALYSIS_MODEL: claude-sonnet-5

@@ -107,9 +107,26 @@ async function main(): Promise<void> {
     return;
   }
 
+  const sql = getSql();
+
+  // Once-per-day guard: the schedule fires every 20 min for reliability, but the
+  // scoring pass should run once a day. A real pass scores dozens of clusters,
+  // whereas deliver's held-cluster rescoring writes only a handful, so a
+  // threshold of 30 cleanly separates "already analysed today" from rescores.
+  if (!forced) {
+    const [today] = await sql<{ n: number }[]>`
+      SELECT count(*)::int AS n FROM cluster_score
+      WHERE scored_at >= (date_trunc('day', now() AT TIME ZONE ${tz}) AT TIME ZONE ${tz})
+    `;
+    if ((today?.n ?? 0) >= 30) {
+      console.log(`analyse: already ran today (${today?.n} scored); exiting.`);
+      await closeSql();
+      return;
+    }
+  }
+
   // Optional per-run cap (ANALYSE_MAX_CLUSTERS); most-corroborated first.
   const maxClusters = Number(optionalEnv("ANALYSE_MAX_CLUSTERS", "0"));
-  const sql = getSql();
   const clusters = await sql<ClusterRow[]>`
     SELECT c.id, c.corroboration::text AS corroboration
     FROM cluster c
