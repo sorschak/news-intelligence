@@ -1,13 +1,18 @@
 name: retention
 
-# Operations hardening: null embeddings on items past the clustering window and
-# purge the embedding cache, so the Neon database does not grow without bound
-# (embeddings are ~4 KB each and dead weight after 72h). The archive (digest) is
-# never touched. Idempotent; timing is not sensitive, so a single daily cron.
+# Operations hardening: reclaim the 1024-dim vectors (item embeddings, cluster
+# centroids, embedding cache) once past the 72h clustering window, so the Neon
+# database stays bounded on its 512 MB tier. The archive (digest) is never
+# touched. Idempotent. GitHub throttles this repo's scheduled runs hard, so the
+# PRIMARY trigger is cluster completing (event-driven, reliable); the cron is a
+# best-effort backstop.
 
 on:
+  workflow_run:
+    workflows: ["cluster"]
+    types: [completed]
   schedule:
-    - cron: "37 8,9 * * *" # ~04:00 America/Toronto (off-hour, redundant slots; idempotent)
+    - cron: "37 8,9 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -30,7 +35,7 @@ jobs:
       - run: npm run retention
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          RETENTION_DAYS: "10"
+          RETENTION_DAYS: "4"
       - name: Alert on failure
         if: failure()
         run: npm run alert
