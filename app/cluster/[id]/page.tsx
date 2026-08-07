@@ -113,12 +113,20 @@ export default async function ClusterPage({ params }: { params: Promise<{ id: st
            ephemerality, rationale, single_source
     FROM cluster_score WHERE cluster_id = ${id} ORDER BY scored_at DESC LIMIT 1
   `;
+  // Dedupe by URL: the same article is often ingested via several of an outlet's
+  // section feeds, producing duplicate item rows. Keep one per URL (lowest tier,
+  // then earliest), then order the distinct sources.
   const items = await sql<ItemRow[]>`
-    SELECT i.headline, i.url, i.standfirst, i.published_at, i.origin_class, i.language,
-           o.name AS outlet, o.region, o.tier
-    FROM item i JOIN outlet o ON o.id = i.outlet_id
-    WHERE i.cluster_id = ${id}
-    ORDER BY o.tier ASC, i.published_at ASC
+    WITH ranked AS (
+      SELECT i.headline, i.url, i.standfirst, i.published_at, i.origin_class, i.language,
+             o.name AS outlet, o.region, o.tier,
+             row_number() OVER (PARTITION BY i.url ORDER BY o.tier ASC, i.published_at ASC) AS rn
+      FROM item i JOIN outlet o ON o.id = i.outlet_id
+      WHERE i.cluster_id = ${id}
+    )
+    SELECT headline, url, standfirst, published_at, origin_class, language, outlet, region, tier
+    FROM ranked WHERE rn = 1
+    ORDER BY tier ASC, published_at ASC
   `;
   const claims = await sql<ClaimRow[]>`
     SELECT nc.claim_key, nc.value::text, nc.unit, nc.as_of, o.name AS outlet
@@ -158,7 +166,7 @@ export default async function ClusterPage({ params }: { params: Promise<{ id: st
           </>
         )}
         corroboration {cluster.corroboration ? Number(cluster.corroboration).toFixed(2) : "—"} ·{" "}
-        {Number(cluster.originator_count)} originators · {cluster.item_count} reports ·{" "}
+        {Number(cluster.originator_count)} originators · {items.length} reports ·{" "}
         {regions.length} region{regions.length === 1 ? "" : "s"} · {languages.length} language
         {languages.length === 1 ? "" : "s"}
         <br />
