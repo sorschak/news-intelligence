@@ -27,13 +27,29 @@ jobs:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # Cost gate: cluster completes ~8x/day, but analyse only works in the
+      # morning window. Off-window triggers skip every step below, so they never
+      # open a DB connection (no Neon compute wake) — the run costs ~2s.
+      - id: gate
+        run: |
+          h=$(date -u +%H)
+          if [ "$h" -ge 9 ] && [ "$h" -lt 15 ]; then
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=false" >> "$GITHUB_OUTPUT"
+            echo "analyse: ${h}:00 UTC outside the 09-15 UTC window; skipping (no DB wake)."
+          fi
+      - if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@v4
+      - if: steps.gate.outputs.go == 'true'
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm run analyse
+      - if: steps.gate.outputs.go == 'true'
+        run: npm ci
+      - if: steps.gate.outputs.go == 'true'
+        run: npm run analyse
         env:
           TZ: America/Toronto
           ANALYSIS_LOCAL_HOUR: "5"

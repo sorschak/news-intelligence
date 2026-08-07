@@ -26,13 +26,28 @@ jobs:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # Cost gate: skip every step (no DB connection, no Neon wake) unless we're
+      # in the delivery window. Off-window cluster/analyse completions cost ~2s.
+      - id: gate
+        run: |
+          h=$(date -u +%H)
+          if [ "$h" -ge 10 ] && [ "$h" -lt 16 ]; then
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=false" >> "$GITHUB_OUTPUT"
+            echo "deliver: ${h}:00 UTC outside the 10-16 UTC window; skipping (no DB wake)."
+          fi
+      - if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@v4
+      - if: steps.gate.outputs.go == 'true'
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm run deliver
+      - if: steps.gate.outputs.go == 'true'
+        run: npm ci
+      - if: steps.gate.outputs.go == 'true'
+        run: npm run deliver
         env:
           TZ: America/Toronto
           TARGET_LOCAL_HOUR: "6"

@@ -1,18 +1,15 @@
 name: retention
 
 # Operations hardening: reclaim the 1024-dim vectors (item embeddings, cluster
-# centroids, embedding cache) once past the 72h clustering window, so the Neon
-# database stays bounded on its 512 MB tier. The archive (digest) is never
-# touched. Idempotent. GitHub throttles this repo's scheduled runs hard, so the
-# PRIMARY trigger is cluster completing (event-driven, reliable); the cron is a
-# best-effort backstop.
+# centroids, embedding cache) once past the 72h clustering window. The archive
+# (digest) is never touched. Idempotent. On the paid tier (10 GB) storage is no
+# longer tight, so this runs on a daily schedule rather than on every cluster
+# completion — fewer compute wake-ups, lower cost. A couple of off-hour slots
+# improve the odds one lands despite GitHub's scheduled-run throttling.
 
 on:
-  workflow_run:
-    workflows: ["cluster"]
-    types: [completed]
   schedule:
-    - cron: "37 8,9 * * *"
+    - cron: "37 7,8,9 * * *"
   workflow_dispatch:
 
 concurrency:
