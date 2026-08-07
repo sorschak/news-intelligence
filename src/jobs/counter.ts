@@ -203,6 +203,7 @@ async function main(): Promise<void> {
     withheld,
     contribution,
     coverageGaps,
+    baseUrl: base,
   });
 
   if (preview) {

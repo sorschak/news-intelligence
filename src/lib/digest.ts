@@ -120,14 +120,21 @@ function renderDivergence(divs: Divergence[]): string {
     .join("");
 }
 
-/** Render one item with mandatory outlet + timestamp + link (SPEC 9.3). */
-export function renderItem(c: ScoredCluster): string {
+/**
+ * Render one item with mandatory outlet + timestamp + link (SPEC 9.3). When
+ * `baseUrl` is set, appends a link to the story's cluster page, where the reader
+ * can see every source, the score breakdown, and the divergence timeline.
+ */
+export function renderItem(c: ScoredCluster, baseUrl = ""): string {
   const excerpt = c.standfirst ? capWords(c.standfirst) : "";
   // Single-source assertions are prefixed with the attributing outlet.
   const attributed = excerpt
     ? c.singleSource
       ? `${esc(c.outlet)} reports: ${esc(excerpt)}`
       : esc(excerpt)
+    : "";
+  const explore = baseUrl
+    ? ` · <a class="sources" href="${esc(baseUrl)}/cluster/${esc(c.id)}">explore sources ›</a>`
     : "";
   return [
     "<li>",
@@ -138,15 +145,20 @@ export function renderItem(c: ScoredCluster): string {
     // separates this from a ranked list (SPEC 9.1).
     c.rationale ? `<div class="rationale">${esc(c.rationale)}</div>` : "",
     c.divergences?.length ? renderDivergence(c.divergences) : "",
-    `<div class="meta">salience ${c.salience.toFixed(3)} · corroboration ${c.corroboration.toFixed(2)} · ${c.originatorCount} originators</div>`,
+    `<div class="meta">salience ${c.salience.toFixed(3)} · corroboration ${c.corroboration.toFixed(2)} · ${c.originatorCount} originators${explore}</div>`,
     "</li>",
   ].join("");
 }
 
-function renderSection(title: string, items: ScoredCluster[], description = ""): string {
+function renderSection(
+  title: string,
+  items: ScoredCluster[],
+  description = "",
+  baseUrl = "",
+): string {
   if (items.length === 0) return "";
   const desc = description ? `<p class="desc">${esc(description)}</p>` : "";
-  return `<section><h2>${esc(title)}</h2>${desc}<ul>${items.map(renderItem).join("")}</ul></section>`;
+  return `<section><h2>${esc(title)}</h2>${desc}<ul>${items.map((c) => renderItem(c, baseUrl)).join("")}</ul></section>`;
 }
 
 export type DigestSections = {
@@ -163,6 +175,7 @@ export type DigestInput = {
   overview: string; // prose, no lists (SPEC 9.1)
   operations: string; // one line
   sections: DigestSections;
+  baseUrl?: string; // app origin, for per-story "explore sources" links
 };
 
 /** Compose all sections from the scored candidate pool (SPEC 9.1). */
@@ -206,13 +219,14 @@ function readingGuideHtml(salienceLabel = "salience", showOriginators = true): s
 /** Render the digest to a static HTML string persisted to digest.html (SPEC 3.2). */
 export function renderDigestHtml(input: DigestInput): string {
   const { sections } = input;
+  const base = input.baseUrl ?? "";
   return [
     "<!doctype html>",
     '<html lang="en"><head><meta charset="utf-8">',
     `<title>News Intelligence — ${esc(input.editionDate)}</title>`,
     "<style>body{font:16px/1.5 Georgia,serif;max-width:44rem;margin:2rem auto;padding:0 1rem}",
     "h1{font-size:1.4rem}h2{font-size:1.1rem;border-bottom:1px solid #ccc;padding-bottom:.2rem}",
-    ".excerpt{color:#333;margin:.2rem 0}.meta{color:#777;font-size:.8rem}",
+    ".excerpt{color:#333;margin:.2rem 0}.meta{color:#777;font-size:.8rem}.sources{white-space:nowrap}",
     ".rationale{color:#222;margin:.2rem 0}.divergence{color:#333;margin:.2rem 0;font-size:.9rem}.dtime{color:#999}",
     ".desc{color:#777;font-size:.85rem;font-style:italic;margin:.1rem 0 .5rem}",
     ".guide{color:#555;font-size:.85rem;margin-top:2rem}.guide h2{font-size:1rem}",
@@ -224,31 +238,37 @@ export function renderDigestHtml(input: DigestInput): string {
       "Structural",
       sections.structural,
       "Stories that change a law, market, or institution.",
+      base,
     ),
     renderSection(
       "Corroborated events",
       sections.corroborated,
       "Independently confirmed by many separate sources.",
+      base,
     ),
     renderSection(
       "Contribution",
       sections.contribution,
       "Adds genuinely new knowledge, not just repetition.",
+      base,
     ),
     renderSection(
       "Divergence watch",
       sections.divergence,
       "A key figure that disagrees across sources over time — watch how it moved.",
+      base,
     ),
     renderSection(
       "Thinly sourced",
       sections.thinlySourced,
       "Only one or two sources — important if true, but not yet confirmed.",
+      base,
     ),
     renderSection(
       "Held and released",
       sections.heldReleased,
       "Held back to avoid overreacting to a spike, released once it held up.",
+      base,
     ),
     readingGuideHtml(),
     `<footer>Operations: ${esc(input.operations)}</footer>`,
@@ -275,17 +295,21 @@ export type CounterDigestInput = {
   withheld: CounterItem[];
   contribution: ScoredCluster[];
   coverageGaps: string[];
+  baseUrl?: string; // app origin, for per-story "explore sources" links
 };
 
-function renderCounterItem(item: CounterItem): string {
+function renderCounterItem(item: CounterItem, baseUrl = ""): string {
   const c = item.cluster;
   const excerpt = c.standfirst ? capWords(c.standfirst) : "";
+  const explore = baseUrl
+    ? ` · <a class="sources" href="${esc(baseUrl)}/cluster/${esc(c.id)}">explore sources ›</a>`
+    : "";
   return [
     "<li>",
     `<a href="${esc(c.url)}">${esc(c.headline)}</a>`,
     ` — ${esc(c.outlet)}, ${fmtTime(c.publishedAt)}`,
     excerpt ? `<div class="excerpt">${esc(excerpt)}</div>` : "",
-    `<div class="meta">undomained salience ${c.salience.toFixed(3)} · corroboration ${c.corroboration.toFixed(2)}</div>`,
+    `<div class="meta">undomained salience ${c.salience.toFixed(3)} · corroboration ${c.corroboration.toFixed(2)}${explore}</div>`,
     `<div class="feedback"><a href="${esc(item.valuedUrl)}">worth seeing</a> · <a href="${esc(item.indifferentUrl)}">indifferent</a></div>`,
     "</li>",
   ].join("");
@@ -294,13 +318,14 @@ function renderCounterItem(item: CounterItem): string {
 /** Render the fortnightly counter-bias edition (SPEC 9.5.5). */
 export function renderCounterHtml(input: CounterDigestInput): string {
   const gaps = input.coverageGaps.length ? input.coverageGaps.join(", ") : "none identified";
+  const base = input.baseUrl ?? "";
   return [
     "<!doctype html>",
     '<html lang="en"><head><meta charset="utf-8">',
     `<title>Counter-bias edition — ${esc(input.editionDate)}</title>`,
     "<style>body{font:16px/1.5 Georgia,serif;max-width:44rem;margin:2rem auto;padding:0 1rem}",
     "h1{font-size:1.4rem}h2{font-size:1.1rem;border-bottom:1px solid #ccc;padding-bottom:.2rem}",
-    ".excerpt{color:#333;margin:.2rem 0}.meta{color:#777;font-size:.8rem}.feedback{font-size:.85rem;margin:.2rem 0}",
+    ".excerpt{color:#333;margin:.2rem 0}.meta{color:#777;font-size:.8rem}.feedback{font-size:.85rem;margin:.2rem 0}.sources{white-space:nowrap}",
     ".guide{color:#555;font-size:.85rem;margin-top:2rem}.guide h2{font-size:1rem}",
     "footer{color:#777;font-size:.8rem;border-top:1px solid #ccc;margin-top:2rem;padding-top:.5rem}</style>",
     "</head><body>",
@@ -310,10 +335,10 @@ export function renderCounterHtml(input: CounterDigestInput): string {
     `Pool: ${input.poolSize} clusters scored in the trailing 14 days.<br>`,
     `${esc(input.comparison)}</p></section>`,
     input.withheld.length
-      ? `<section><h2>Withheld items</h2><ul>${input.withheld.map(renderCounterItem).join("")}</ul></section>`
+      ? `<section><h2>Withheld items</h2><ul>${input.withheld.map((w) => renderCounterItem(w, base)).join("")}</ul></section>`
       : "",
     input.contribution.length
-      ? `<section><h2>Contribution</h2><ul>${input.contribution.map(renderItem).join("")}</ul></section>`
+      ? `<section><h2>Contribution</h2><ul>${input.contribution.map((c) => renderItem(c, base)).join("")}</ul></section>`
       : "",
     `<section><h2>Coverage gaps</h2><p>${esc(gaps)}</p></section>`,
     readingGuideHtml("undomained salience", false),

@@ -302,7 +302,13 @@ async function main(): Promise<void> {
   const overview = await synthesizeOverview(overviewPool);
   const operations = await operationsLine(sql);
 
-  const html = renderDigestHtml({ editionDate, overview, operations, sections });
+  const html = renderDigestHtml({
+    editionDate,
+    overview,
+    operations,
+    sections,
+    baseUrl: optionalEnv("APP_BASE_URL", ""),
+  });
   const clusterIds = digestClusterIds(sections);
 
   if (preview) {

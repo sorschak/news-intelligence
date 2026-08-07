@@ -52,6 +52,7 @@ jobs:
           TZ: America/Toronto
           TARGET_LOCAL_HOUR: "6"
           GITHUB_EVENT_NAME: ${{ github.event_name }}
+          APP_BASE_URL: https://news-intelligence-self.vercel.app
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           MAIL_API_KEY: ${{ secrets.MAIL_API_KEY }}
