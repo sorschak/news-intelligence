@@ -33,10 +33,15 @@ type PendingItem = {
 };
 
 async function nearestCluster(sql: Sql, vectorLiteral: string): Promise<Nearest | null> {
+  // Cap cluster age (SPEC 6.3): only attach to clusters younger than the window
+  // by FIRST-seen. Without this, a running story keeps bumping last_seen and never
+  // ages out — it accretes items for weeks, dominates salience, and resurfaces in
+  // every digest. Past the cap, a continuing story forms a fresh daily cluster.
   const rows = await sql<{ id: number; similarity: number }[]>`
     SELECT id, 1 - (centroid <=> ${vectorLiteral}::vector) AS similarity
     FROM cluster
     WHERE last_seen_at > now() - ${WINDOW}::interval
+      AND first_seen_at > now() - ${WINDOW}::interval
     ORDER BY centroid <=> ${vectorLiteral}::vector
     LIMIT 1
   `;
@@ -95,6 +100,8 @@ async function consolidate(sql: Sql): Promise<number> {
     JOIN cluster b ON a.id < b.id
     WHERE a.last_seen_at > now() - ${WINDOW}::interval
       AND b.last_seen_at > now() - ${WINDOW}::interval
+      AND a.first_seen_at > now() - ${WINDOW}::interval
+      AND b.first_seen_at > now() - ${WINDOW}::interval
       AND 1 - (a.centroid <=> b.centroid) >= ${MERGE_THRESHOLD}
     ORDER BY similarity DESC
   `;

@@ -222,8 +222,17 @@ async function main(): Promise<void> {
     FROM cluster c
     JOIN latest l ON l.cluster_id = c.id
     JOIN lead d ON d.cluster_id = c.id
-    WHERE c.last_seen_at > now() - ${WINDOW}::interval
-       OR (c.state = 'held' AND c.held_until <= now())
+    WHERE (c.last_seen_at > now() - ${WINDOW}::interval
+           OR (c.state = 'held' AND c.held_until <= now()))
+      -- Cross-day dedup: a story already delivered in the last few days does not
+      -- reappear. Combined with the 72h cluster-age cap, each story is shown once;
+      -- a genuinely continuing story resurfaces later as a fresh cluster.
+      AND NOT EXISTS (
+        SELECT 1 FROM digest g
+        WHERE g.kind = 'daily'
+          AND g.generated_at > now() - interval '3 days'
+          AND c.id = ANY(g.cluster_ids)
+      )
   `;
 
   // Divergence sequences from stored numeric claims (SPEC 8.3).
