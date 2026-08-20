@@ -178,14 +178,34 @@ export type DigestInput = {
   baseUrl?: string; // app origin, for per-story "explore sources" links
 };
 
-/** Compose all sections from the scored candidate pool (SPEC 9.1). */
+/**
+ * Compose all sections from the scored candidate pool (SPEC 9.1).
+ *
+ * Sections are mutually exclusive: each story appears in exactly one, its most
+ * informative. Clusters are claimed in priority order — Divergence (its own
+ * timeline view) → Structural (changes a rule) → Contribution (new knowledge) →
+ * Corroborated (well-attested catch-all) → Thinly sourced (the inversion) — and a
+ * claimed cluster is removed from consideration for the later sections, so a
+ * story that is both structural and corroborated is shown once, under Structural.
+ */
 export function composeSections(candidates: ScoredCluster[]): DigestSections {
+  const claimed = new Set<string>();
+  const take = (select: (cs: ScoredCluster[]) => ScoredCluster[]): ScoredCluster[] => {
+    const picked = select(candidates.filter((c) => !claimed.has(c.id)));
+    for (const c of picked) claimed.add(c.id);
+    return picked;
+  };
+  const divergence = take(selectDivergence);
+  const structural = take(selectStructural);
+  const contribution = take(selectContribution);
+  const corroborated = take(selectCorroborated);
+  const thinlySourced = take(selectThinlySourced);
   return {
-    structural: selectStructural(candidates),
-    corroborated: selectCorroborated(candidates),
-    contribution: selectContribution(candidates),
-    divergence: selectDivergence(candidates),
-    thinlySourced: selectThinlySourced(candidates),
+    structural,
+    corroborated,
+    contribution,
+    divergence,
+    thinlySourced,
     heldReleased: [], // filled by the deliver job from released holds
   };
 }
